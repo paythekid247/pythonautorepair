@@ -62,12 +62,20 @@ type MakeState = "" | PopularMake;
 type ContactMode = "call" | "email" | "directions" | null;
 
 export default function Page() {
+  // Shop constants
   const SHOP_PHONE_DISPLAY = "(561) 371-5673";
   const SHOP_PHONE_TEL = "+15613715673";
   const SHOP_EMAIL = "info@pythonautorepair.com";
   const SHOP_ADDRESS = "1114 NE 4th Ave, Fort Lauderdale, FL 33304";
   const SHOP_MAPS_URL =
     "https://www.google.com/maps/search/?api=1&query=1114%20NE%204th%20Ave%2C%20Fort%20Lauderdale%2C%20FL%2033304";
+
+  // Reviews (your real links)
+  const GOOGLE_REVIEWS_URL = "https://share.google/9i2bJ7yiL59seKe33";
+  const GOOGLE_WRITE_REVIEW_URL =
+    "https://www.google.com/search?sca_esv=d3ad5c95999e7e6c&authuser=1&sxsrf=AE3TifO2B9vg7yqW0JiJfxKytVtxrOMD_Q:1767203095401&si=AMgyJEtREmoPL4P1I5IDCfuA8gybfVI2d5Uj7QMwYCZHKDZ-E-DDUNWo-GSSEVv0-ca8WGcY0XdNhEjstAhidT6zNqG-9BaKDHmiNYhIbdkfJgV9G235fwqFKK8c4MNtZdF0ozJ3f1NVPzLg2p0mopier6SVzNh5Bw%3D%3D&q=Python+Auto+Repair+Reviews&sa=X&ved=2ahUKEwjlhf3FsOiRAxWERzABHQ93KDEQ0bkNegQIKBAE&biw=643&bih=738&dpr=1.75#lrd=0x88d90157a8dfd125:0xbc74768f80596ea4,3,,,,";
+  const YELP_URL = ""; // optional
+  const FACEBOOK_URL = ""; // optional
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -144,7 +152,6 @@ export default function Page() {
       setToast(label);
       window.setTimeout(() => setToast(null), 1500);
     } catch {
-      // fallback
       const ta = document.createElement("textarea");
       ta.value = text;
       document.body.appendChild(ta);
@@ -173,29 +180,39 @@ export default function Page() {
     await copyToClipboard(shareText, "Address copied");
   }
 
+  const hasYelp = !!YELP_URL.trim();
+  const hasFacebook = !!FACEBOOK_URL.trim();
+
   return (
-    <main className="relative min-h-screen overflow-hidden bg-[#050A07] text-white">
-      {/* Background */}
+    <main className="relative min-h-screen overflow-hidden bg-[#040706] text-white">
+      {/* Background (black + forest green + exotic accents) */}
       <div className="pointer-events-none absolute inset-0 -z-10">
-        <div className="absolute inset-0 bg-gradient-to-b from-[#06110B] via-[#050A07] to-[#050A07]" />
-        <div className="absolute -top-24 left-1/2 h-[520px] w-[900px] -translate-x-1/2 rounded-full bg-[#0E2A18]/35 blur-3xl" />
-        <div className="absolute top-[30%] left-[-10%] h-[420px] w-[420px] rounded-full bg-[#0B2416]/35 blur-3xl" />
-        <div className="absolute bottom-[-10%] right-[-10%] h-[520px] w-[520px] rounded-full bg-[#12351F]/25 blur-3xl" />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#020403] via-[#040706] to-[#040706]" />
+        <div className="absolute -top-28 left-1/2 h-[560px] w-[980px] -translate-x-1/2 rounded-full bg-[#0E2F1D]/40 blur-3xl" />
+        <div className="absolute top-[30%] left-[-12%] h-[460px] w-[460px] rounded-full bg-[#0A2416]/40 blur-3xl" />
+        <div className="absolute bottom-[-14%] right-[-14%] h-[560px] w-[560px] rounded-full bg-[#123A23]/28 blur-3xl" />
+
+        {/* exotic accents */}
+        <div className="absolute top-[18%] right-[8%] h-[240px] w-[240px] rounded-full bg-[#0F3D2A]/25 blur-3xl" />
+        <div className="absolute bottom-[18%] left-[10%] h-[240px] w-[240px] rounded-full bg-[#2A1B3D]/12 blur-3xl" />
+        <div className="absolute bottom-[10%] right-[38%] h-[220px] w-[220px] rounded-full bg-[#1E4F3B]/18 blur-3xl" />
+
         <div
-          className="absolute inset-0 opacity-[0.08]"
+          className="absolute inset-0 opacity-[0.09]"
           style={{
             backgroundImage:
-              "radial-gradient(circle at 1px 1px, rgba(255,255,255,0.35) 1px, transparent 0)",
-            backgroundSize: "28px 28px",
+              "radial-gradient(circle at 1px 1px, rgba(255,255,255,0.33) 1px, transparent 0)",
+            backgroundSize: "26px 26px",
           }}
         />
       </div>
 
-      <JunglePlants />
+      {/* decorative “lush” look without saying jungle */}
+      <SerpentCanopy />
 
       {/* Toast */}
       {toast && (
-        <div className="fixed bottom-6 left-1/2 z-50 -translate-x-1/2 rounded-2xl border border-[#2E5A3E] bg-[#0B1B12]/95 px-4 py-2 text-sm text-white/90 shadow-lg backdrop-blur">
+        <div className="fixed bottom-6 left-1/2 z-50 -translate-x-1/2 rounded-2xl border border-[#1E4F3B] bg-[#06110C]/95 px-4 py-2 text-sm text-white/90 shadow-lg backdrop-blur">
           {toast}
         </div>
       )}
@@ -218,8 +235,8 @@ export default function Page() {
         <header className="w-full py-5">
           <div className="flex w-full flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-3">
-              <div className="grid h-10 w-10 place-items-center rounded-2xl border border-[#1D3B28] bg-[#07140C]">
-                <span className="text-sm font-semibold text-[#E8D48A]">AI</span>
+              <div className="grid h-10 w-10 place-items-center rounded-2xl border border-[#15402F] bg-[#06110C]">
+                <span className="text-sm font-semibold text-[#34D399]">AI</span>
               </div>
               <div className="leading-tight">
                 <div className="text-sm font-semibold tracking-wide">Python Auto Repair</div>
@@ -231,7 +248,7 @@ export default function Page() {
               <button
                 type="button"
                 onClick={() => setContactMode("call")}
-                className="rounded-2xl border border-[#2E5A3E] bg-[#0B1B12] px-4 py-2 text-sm font-semibold text-white/90 hover:bg-[#0E2418]"
+                className="rounded-2xl border border-[#1E4F3B] bg-[#06110C] px-4 py-2 text-sm font-semibold text-white/90 hover:bg-[#0A1B13]"
               >
                 Call
               </button>
@@ -239,7 +256,7 @@ export default function Page() {
               <button
                 type="button"
                 onClick={() => setContactMode("email")}
-                className="rounded-2xl border border-[#2E5A3E] bg-[#0B1B12] px-4 py-2 text-sm font-semibold text-white/90 hover:bg-[#0E2418]"
+                className="rounded-2xl border border-[#1E4F3B] bg-[#06110C] px-4 py-2 text-sm font-semibold text-white/90 hover:bg-[#0A1B13]"
               >
                 Email
               </button>
@@ -247,7 +264,7 @@ export default function Page() {
               <button
                 type="button"
                 onClick={() => setContactMode("directions")}
-                className="rounded-2xl border border-[#2E5A3E] bg-[#0B1B12] px-4 py-2 text-sm font-semibold text-white/90 hover:bg-[#0E2418]"
+                className="rounded-2xl border border-[#1E4F3B] bg-[#06110C] px-4 py-2 text-sm font-semibold text-white/90 hover:bg-[#0A1B13]"
               >
                 Directions
               </button>
@@ -257,28 +274,42 @@ export default function Page() {
 
         {/* Hero */}
         <section className="w-full pb-8 pt-4 text-center">
-          <h1 className="text-4xl font-semibold leading-[1.05] tracking-tight md:text-5xl">
-            Jungle-fast estimates.
-            <span className="block text-[#E8D48A]">Upload. Submit. Done.</span>
+          <div className="mx-auto inline-flex items-center gap-2 rounded-full border border-[#15402F] bg-[#06110C]/70 px-4 py-2 text-xs text-white/70">
+            <span className="h-2 w-2 rounded-full bg-[#34D399]" />
+            Python-fast • precise • strong
+          </div>
+
+          <h1 className="mt-4 text-4xl font-semibold leading-[1.05] tracking-tight md:text-5xl">
+            Python-fast estimates.
+            <span className="block text-[#34D399]">Upload. Submit. Done.</span>
           </h1>
+
           <p className="mx-auto mt-3 max-w-2xl text-sm text-white/70 md:text-base">
-            Works on iPhone and Android. Tap the python, add photos, and we’ll reply fast.
+            Works on iPhone and Android. Tap the python head, add photos, and we’ll respond quickly with next steps.
           </p>
+
+          <div className="mx-auto mt-5 flex max-w-2xl flex-wrap items-center justify-center gap-2 text-[11px] text-white/55">
+            <span className="rounded-full border border-[#15402F] bg-[#06110C]/60 px-3 py-1">Collision</span>
+            <span className="rounded-full border border-[#15402F] bg-[#06110C]/60 px-3 py-1">Scratches</span>
+            <span className="rounded-full border border-[#15402F] bg-[#06110C]/60 px-3 py-1">Bumper</span>
+            <span className="rounded-full border border-[#15402F] bg-[#06110C]/60 px-3 py-1">Dent repair</span>
+            <span className="rounded-full border border-[#15402F] bg-[#06110C]/60 px-3 py-1">Paint</span>
+          </div>
         </section>
 
         {/* Form */}
-        <section className="w-full pb-16">
-          <div className="rounded-3xl border border-[#1D3B28] bg-[#07140C] p-6">
+        <section className="w-full pb-10">
+          <div className="rounded-3xl border border-[#15402F] bg-[#06110C] p-6 shadow-[0_20px_80px_rgba(0,0,0,0.45)]">
             {submitted ? (
-              <div className="rounded-2xl border border-[#2E5A3E] bg-[#0B1B12] p-5 text-center">
-                <div className="text-lg font-semibold text-[#E8D48A]">Submitted ✅</div>
+              <div className="rounded-2xl border border-[#1E4F3B] bg-[#040706] p-5 text-center">
+                <div className="text-lg font-semibold text-[#34D399]">Submitted ✅</div>
                 <p className="mt-2 text-sm text-white/75">We’ll contact you soon.</p>
 
                 <div className="mt-4 flex flex-col items-center justify-center gap-3 sm:flex-row">
                   <button
                     type="button"
                     onClick={() => setContactMode("call")}
-                    className="inline-flex items-center justify-center rounded-2xl bg-[#E8D48A] px-5 py-3 text-sm font-semibold text-[#0B0F0C] hover:brightness-95"
+                    className="inline-flex items-center justify-center rounded-2xl bg-[#34D399] px-5 py-3 text-sm font-semibold text-[#06110C] hover:brightness-95"
                   >
                     Contact shop
                   </button>
@@ -288,7 +319,7 @@ export default function Page() {
                       setSubmitted(false);
                       resetForm();
                     }}
-                    className="inline-flex items-center justify-center rounded-2xl border border-[#2E5A3E] bg-[#0B1B12] px-5 py-3 text-sm font-semibold text-white/90 hover:bg-[#0E2418]"
+                    className="inline-flex items-center justify-center rounded-2xl border border-[#1E4F3B] bg-[#06110C] px-5 py-3 text-sm font-semibold text-white/90 hover:bg-[#0A1B13]"
                   >
                     New estimate
                   </button>
@@ -302,7 +333,7 @@ export default function Page() {
                       value={name}
                       onChange={(e) => setName(e.target.value)}
                       placeholder="Your name"
-                      className="w-full rounded-2xl border border-[#1D3B28] bg-[#050A07] px-4 py-3 text-sm text-white/90 placeholder:text-white/35 outline-none focus:border-[#E8D48A]/60"
+                      className="w-full rounded-2xl border border-[#15402F] bg-[#040706] px-4 py-3 text-sm text-white/90 placeholder:text-white/35 outline-none focus:border-[#34D399]/70"
                     />
                   </Field>
 
@@ -312,7 +343,7 @@ export default function Page() {
                       onChange={(e) => setPhone(e.target.value)}
                       placeholder="(XXX) XXX-XXXX"
                       inputMode="tel"
-                      className="w-full rounded-2xl border border-[#1D3B28] bg-[#050A07] px-4 py-3 text-sm text-white/90 placeholder:text-white/35 outline-none focus:border-[#E8D48A]/60"
+                      className="w-full rounded-2xl border border-[#15402F] bg-[#040706] px-4 py-3 text-sm text-white/90 placeholder:text-white/35 outline-none focus:border-[#34D399]/70"
                     />
                   </Field>
                 </div>
@@ -322,7 +353,7 @@ export default function Page() {
                     <select
                       value={year}
                       onChange={(e) => setYear(e.target.value ? Number(e.target.value) : "")}
-                      className="w-full rounded-2xl border border-[#1D3B28] bg-[#050A07] px-4 py-3 text-sm text-white/90 outline-none focus:border-[#E8D48A]/60"
+                      className="w-full rounded-2xl border border-[#15402F] bg-[#040706] px-4 py-3 text-sm text-white/90 outline-none focus:border-[#34D399]/70"
                     >
                       <option value="">Select</option>
                       {yearsList(1990).map((y) => (
@@ -343,7 +374,7 @@ export default function Page() {
                         setOtherMake("");
                         setOtherModel("");
                       }}
-                      className="w-full rounded-2xl border border-[#1D3B28] bg-[#050A07] px-4 py-3 text-sm text-white/90 outline-none focus:border-[#E8D48A]/60"
+                      className="w-full rounded-2xl border border-[#15402F] bg-[#040706] px-4 py-3 text-sm text-white/90 outline-none focus:border-[#34D399]/70"
                     >
                       <option value="">Select</option>
                       {POPULAR_MAKES.map((m) => (
@@ -360,14 +391,14 @@ export default function Page() {
                         value={otherModel}
                         onChange={(e) => setOtherModel(e.target.value)}
                         placeholder="Model"
-                        className="w-full rounded-2xl border border-[#1D3B28] bg-[#050A07] px-4 py-3 text-sm text-white/90 placeholder:text-white/35 outline-none focus:border-[#E8D48A]/60"
+                        className="w-full rounded-2xl border border-[#15402F] bg-[#040706] px-4 py-3 text-sm text-white/90 placeholder:text-white/35 outline-none focus:border-[#34D399]/70"
                       />
                     ) : (
                       <select
                         value={model}
                         onChange={(e) => setModel(e.target.value)}
                         disabled={make === ""}
-                        className="w-full rounded-2xl border border-[#1D3B28] bg-[#050A07] px-4 py-3 text-sm text-white/90 outline-none disabled:opacity-50 focus:border-[#E8D48A]/60"
+                        className="w-full rounded-2xl border border-[#15402F] bg-[#040706] px-4 py-3 text-sm text-white/90 outline-none disabled:opacity-50 focus:border-[#34D399]/70"
                       >
                         <option value="">{make ? "Select" : "Pick make first"}</option>
                         {modelOptions.map((mo) => (
@@ -387,7 +418,7 @@ export default function Page() {
                         value={otherMake}
                         onChange={(e) => setOtherMake(e.target.value)}
                         placeholder="Make"
-                        className="w-full rounded-2xl border border-[#1D3B28] bg-[#050A07] px-4 py-3 text-sm text-white/90 placeholder:text-white/35 outline-none focus:border-[#E8D48A]/60"
+                        className="w-full rounded-2xl border border-[#15402F] bg-[#040706] px-4 py-3 text-sm text-white/90 placeholder:text-white/35 outline-none focus:border-[#34D399]/70"
                       />
                     </Field>
                     <div className="hidden sm:block" />
@@ -400,7 +431,7 @@ export default function Page() {
                     onChange={(e) => setNotes(e.target.value)}
                     placeholder="Where is the damage? Is it drivable?"
                     rows={3}
-                    className="w-full resize-none rounded-2xl border border-[#1D3B28] bg-[#050A07] px-4 py-3 text-sm text-white/90 placeholder:text-white/35 outline-none focus:border-[#E8D48A]/60"
+                    className="w-full resize-none rounded-2xl border border-[#15402F] bg-[#040706] px-4 py-3 text-sm text-white/90 placeholder:text-white/35 outline-none focus:border-[#34D399]/70"
                   />
                 </Field>
 
@@ -414,7 +445,7 @@ export default function Page() {
                     <button
                       type="button"
                       onClick={openCameraOrPicker}
-                      className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#E8D48A] px-5 py-3 text-sm font-semibold text-[#0B0F0C] hover:brightness-95"
+                      className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#34D399] px-5 py-3 text-sm font-semibold text-[#06110C] hover:brightness-95"
                     >
                       📸 Add photos
                     </button>
@@ -437,18 +468,14 @@ export default function Page() {
                       {photos.map((file, idx) => (
                         <div
                           key={`${file.name}-${idx}`}
-                          className="group relative overflow-hidden rounded-2xl border border-[#1D3B28] bg-[#050A07]"
+                          className="group relative overflow-hidden rounded-2xl border border-[#15402F] bg-[#040706]"
                         >
                           {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img
-                            alt={`Uploaded ${idx + 1}`}
-                            src={URL.createObjectURL(file)}
-                            className="h-28 w-full object-cover"
-                          />
+                          <img alt={`Uploaded ${idx + 1}`} src={URL.createObjectURL(file)} className="h-28 w-full object-cover" />
                           <button
                             type="button"
                             onClick={() => removePhoto(idx)}
-                            className="absolute right-2 top-2 rounded-full border border-[#2E5A3E] bg-[#0B1B12]/90 px-2 py-1 text-xs text-white/85 opacity-0 backdrop-blur group-hover:opacity-100"
+                            className="absolute right-2 top-2 rounded-full border border-[#1E4F3B] bg-[#06110C]/90 px-2 py-1 text-xs text-white/85 opacity-0 backdrop-blur group-hover:opacity-100"
                             aria-label="Remove photo"
                           >
                             ✕
@@ -463,9 +490,9 @@ export default function Page() {
                   <button
                     type="submit"
                     disabled={!canSubmit}
-                    className="inline-flex w-full items-center justify-center gap-3 rounded-2xl bg-[#E8D48A] px-6 py-4 text-sm font-semibold text-[#0B0F0C] hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-60"
+                    className="inline-flex w-full items-center justify-center gap-3 rounded-2xl bg-[#34D399] px-6 py-4 text-sm font-semibold text-[#06110C] hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-60"
                   >
-                    <PythonHeadIcon className="h-6 w-6 text-[#0B0F0C]" />
+                    <PythonHeadIcon className="h-6 w-6 text-[#06110C]" />
                     Submit for estimate
                   </button>
 
@@ -483,8 +510,63 @@ export default function Page() {
             )}
           </div>
 
-          <div className="mt-6 text-center text-[11px] text-white/40">
-            © {new Date().getFullYear()} Python Auto Repair
+          {/* Reviews Footer */}
+          <footer className="mt-6 rounded-3xl border border-[#15402F] bg-[#06110C] p-6 text-center shadow-[0_20px_80px_rgba(0,0,0,0.35)]">
+            <div className="text-sm font-semibold text-white/90">Reviews</div>
+            <p className="mx-auto mt-2 max-w-2xl text-xs text-white/65">
+              Real customer feedback. If we helped you, drop a review — quick, honest, and appreciated.
+            </p>
+
+            <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
+              <a
+                href={GOOGLE_REVIEWS_URL}
+                target="_blank"
+                rel="noreferrer"
+                className="rounded-2xl bg-[#34D399] px-5 py-3 text-sm font-semibold text-[#06110C] hover:brightness-95"
+              >
+                Google Reviews
+              </a>
+
+              <a
+                href={GOOGLE_WRITE_REVIEW_URL}
+                target="_blank"
+                rel="noreferrer"
+                className="rounded-2xl border border-[#1E4F3B] bg-[#040706] px-5 py-3 text-sm font-semibold text-white/90 hover:bg-[#0A1B13]"
+              >
+                Leave a Review
+              </a>
+
+              {hasYelp && (
+                <a
+                  href={YELP_URL}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="rounded-2xl border border-[#1E4F3B] bg-[#040706] px-5 py-3 text-sm font-semibold text-white/90 hover:bg-[#0A1B13]"
+                >
+                  Yelp
+                </a>
+              )}
+
+              {hasFacebook && (
+                <a
+                  href={FACEBOOK_URL}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="rounded-2xl border border-[#1E4F3B] bg-[#040706] px-5 py-3 text-sm font-semibold text-white/90 hover:bg-[#0A1B13]"
+                >
+                  Facebook
+                </a>
+              )}
+            </div>
+
+            <div className="mt-6 text-center text-[11px] text-white/40">
+              © {new Date().getFullYear()} Python Auto Repair
+            </div>
+          </footer>
+
+          {/* tiny legal */}
+          <div className="mt-4 text-center text-[10px] text-white/35">
+            “Python-fast” refers to response speed and workflow efficiency. Final pricing requires inspection.
           </div>
         </section>
       </div>
@@ -510,50 +592,60 @@ function PythonHeadIcon({ className }: { className?: string }) {
         strokeWidth="1.6"
         strokeLinejoin="round"
       />
-      <path
-        d="M10.7 7.8c1.2-1.7 3.4-2.9 6.1-2.9"
-        stroke="currentColor"
-        strokeWidth="1.6"
-        strokeLinecap="round"
-      />
+      <path d="M10.7 7.8c1.2-1.7 3.4-2.9 6.1-2.9" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
       <circle cx="14.8" cy="7.2" r="0.9" fill="currentColor" />
       <path d="M7.3 11.1c-.6 0-1.1.3-1.5.7" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
     </svg>
   );
 }
 
-function JunglePlants() {
+function SerpentCanopy() {
+  // Rich “lush” color vibe (forest + exotic accents) without using the word “jungle”
   return (
-    <div className="pointer-events-none absolute inset-0 -z-10 opacity-80">
-      <svg className="absolute -top-10 -left-10 h-[320px] w-[320px] blur-[0.2px]" viewBox="0 0 300 300" fill="none">
-        <path d="M40 20c30 40 30 70 5 115-16 28-8 62 18 86" stroke="rgba(232,212,138,0.18)" strokeWidth="2" />
-        <path d="M65 0c25 45 20 85-8 130-15 25-10 52 10 78" stroke="rgba(75,165,110,0.18)" strokeWidth="3" />
-        <path d="M20 55c45 20 70 45 92 82" stroke="rgba(70,180,120,0.12)" strokeWidth="2" />
+    <div className="pointer-events-none absolute inset-0 -z-10 opacity-90">
+      {/* canopy sweep */}
+      <svg className="absolute -top-10 -left-10 h-[380px] w-[380px]" viewBox="0 0 380 380" fill="none">
         <path
-          d="M120 70c-18 8-30 20-36 35 20 3 38-4 54-18-2-7-8-13-18-17Z"
-          fill="rgba(25,90,60,0.35)"
-          stroke="rgba(75,165,110,0.14)"
+          d="M30 90c70-55 130-55 180 0s110 55 180 0"
+          stroke="rgba(52,211,153,0.18)"
+          strokeWidth="4"
+          strokeLinecap="round"
         />
         <path
-          d="M90 125c-18 8-30 20-36 35 20 3 38-4 54-18-2-7-8-13-18-17Z"
-          fill="rgba(20,70,50,0.35)"
-          stroke="rgba(75,165,110,0.12)"
+          d="M20 160c85-65 150-65 200 0s110 65 200 0"
+          stroke="rgba(16,185,129,0.12)"
+          strokeWidth="4"
+          strokeLinecap="round"
+        />
+        <path
+          d="M35 235c65-40 125-40 175 0s110 40 175 0"
+          stroke="rgba(167,243,208,0.10)"
+          strokeWidth="3"
+          strokeLinecap="round"
+        />
+        <path
+          d="M70 300c40-18 80-18 120 0s80 18 120 0"
+          stroke="rgba(34,197,94,0.10)"
+          strokeWidth="2.5"
+          strokeLinecap="round"
         />
       </svg>
 
-      <svg className="absolute -bottom-20 -right-24 h-[520px] w-[520px] opacity-80" viewBox="0 0 520 520" fill="none">
+      {/* corner “leaf” silhouettes */}
+      <svg className="absolute -bottom-28 -right-28 h-[560px] w-[560px] opacity-75" viewBox="0 0 560 560" fill="none">
         <path
-          d="M312 468c88-76 106-193 48-287-43-70-116-104-196-90-71 12-129 63-153 135-22 66-8 145 39 204 62 78 173 101 262 38Z"
-          fill="rgba(10,38,22,0.55)"
-          stroke="rgba(75,165,110,0.16)"
+          d="M125 380c78-135 170-190 275-165 82 20 129 90 112 165-24 107-166 178-299 144-75-19-111-71-88-144Z"
+          fill="rgba(6,17,12,0.70)"
+          stroke="rgba(30,79,59,0.22)"
           strokeWidth="2"
         />
-        <path d="M235 146c-18 55-10 127 25 186" stroke="rgba(232,212,138,0.12)" strokeWidth="3" strokeLinecap="round" />
-        <path d="M190 198c40 10 76 4 106-22" stroke="rgba(70,180,120,0.10)" strokeWidth="3" strokeLinecap="round" />
-        <path d="M210 260c40 10 86 0 122-34" stroke="rgba(70,180,120,0.08)" strokeWidth="3" strokeLinecap="round" />
+        <path d="M170 405c78-92 158-126 250-102" stroke="rgba(52,211,153,0.14)" strokeWidth="4" strokeLinecap="round" />
+        <path d="M215 452c66-70 132-95 204-74" stroke="rgba(34,197,94,0.12)" strokeWidth="4" strokeLinecap="round" />
+        {/* exotic accent stroke */}
+        <path d="M120 510c90-40 170-40 240 0" stroke="rgba(236,72,153,0.10)" strokeWidth="3" strokeLinecap="round" />
       </svg>
 
-      <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-[#06110B] to-transparent opacity-70" />
+      <div className="absolute top-0 left-0 right-0 h-40 bg-gradient-to-b from-[#020403] to-transparent opacity-80" />
     </div>
   );
 }
@@ -610,32 +702,31 @@ function ContactSheet(props: {
 
   return (
     <div className="fixed inset-0 z-50" aria-hidden={!open}>
-      {/* Backdrop */}
       <button
         type="button"
         aria-label="Close sheet"
         onClick={onClose}
-        className="absolute inset-0 cursor-default bg-black/60 backdrop-blur-sm"
+        className="absolute inset-0 cursor-default bg-black/70 backdrop-blur-sm"
       />
 
       <div className="absolute bottom-0 left-0 right-0 mx-auto w-full max-w-xl">
         <div
-          className="rounded-t-3xl border border-[#1D3B28] bg-[#07140C] px-5 pb-6 pt-3 shadow-2xl animate-sheetIn"
+          className="rounded-t-3xl border border-[#15402F] bg-[#06110C] px-5 pb-6 pt-3 shadow-2xl animate-sheetIn"
           onMouseDown={(e) => e.stopPropagation()}
         >
-          <div className="mx-auto mb-3 h-1.5 w-12 rounded-full bg-white/20" />
+          <div className="mx-auto mb-3 h-1.5 w-12 rounded-full bg-white/15" />
           <div className="flex items-center justify-between">
             <div className="text-base font-semibold text-white/90">{title}</div>
             <button
               type="button"
               onClick={onClose}
-              className="rounded-xl border border-[#2E5A3E] bg-[#0B1B12] px-3 py-1.5 text-sm text-white/80 hover:bg-[#0E2418]"
+              className="rounded-xl border border-[#1E4F3B] bg-[#040706] px-3 py-1.5 text-sm text-white/80 hover:bg-[#0A1B13]"
             >
               Close
             </button>
           </div>
 
-          <div className="mt-4 rounded-2xl border border-[#1D3B28] bg-[#050A07] p-4">
+          <div className="mt-4 rounded-2xl border border-[#15402F] bg-[#040706] p-4">
             {mode === "call" && (
               <>
                 <div className="text-xs text-white/55">Phone</div>
@@ -644,14 +735,14 @@ function ContactSheet(props: {
                 <div className="mt-4 flex flex-col gap-2 sm:flex-row">
                   <a
                     href={`tel:${phoneTel}`}
-                    className="inline-flex flex-1 items-center justify-center rounded-2xl bg-[#E8D48A] px-4 py-3 text-sm font-semibold text-[#0B0F0C] hover:brightness-95"
+                    className="inline-flex flex-1 items-center justify-center rounded-2xl bg-[#34D399] px-4 py-3 text-sm font-semibold text-[#06110C] hover:brightness-95"
                   >
                     Call now
                   </a>
                   <button
                     type="button"
                     onClick={() => onCopy(phoneDisplay, "Number copied")}
-                    className="inline-flex flex-1 items-center justify-center rounded-2xl border border-[#2E5A3E] bg-[#0B1B12] px-4 py-3 text-sm font-semibold text-white/90 hover:bg-[#0E2418]"
+                    className="inline-flex flex-1 items-center justify-center rounded-2xl border border-[#1E4F3B] bg-[#06110C] px-4 py-3 text-sm font-semibold text-white/90 hover:bg-[#0A1B13]"
                   >
                     Copy
                   </button>
@@ -667,14 +758,14 @@ function ContactSheet(props: {
                 <div className="mt-4 flex flex-col gap-2 sm:flex-row">
                   <a
                     href={`mailto:${email}`}
-                    className="inline-flex flex-1 items-center justify-center rounded-2xl bg-[#E8D48A] px-4 py-3 text-sm font-semibold text-[#0B0F0C] hover:brightness-95"
+                    className="inline-flex flex-1 items-center justify-center rounded-2xl bg-[#34D399] px-4 py-3 text-sm font-semibold text-[#06110C] hover:brightness-95"
                   >
                     Compose email
                   </a>
                   <button
                     type="button"
                     onClick={() => onCopy(email, "Email copied")}
-                    className="inline-flex flex-1 items-center justify-center rounded-2xl border border-[#2E5A3E] bg-[#0B1B12] px-4 py-3 text-sm font-semibold text-white/90 hover:bg-[#0E2418]"
+                    className="inline-flex flex-1 items-center justify-center rounded-2xl border border-[#1E4F3B] bg-[#06110C] px-4 py-3 text-sm font-semibold text-white/90 hover:bg-[#0A1B13]"
                   >
                     Copy
                   </button>
@@ -692,28 +783,28 @@ function ContactSheet(props: {
                     href={mapsUrl}
                     target="_blank"
                     rel="noreferrer"
-                    className="inline-flex items-center justify-center rounded-2xl bg-[#E8D48A] px-4 py-3 text-sm font-semibold text-[#0B0F0C] hover:brightness-95"
+                    className="inline-flex items-center justify-center rounded-2xl bg-[#34D399] px-4 py-3 text-sm font-semibold text-[#06110C] hover:brightness-95"
                   >
                     Open Maps
                   </a>
                   <button
                     type="button"
                     onClick={() => onCopy(mapsUrl, "Maps link copied")}
-                    className="inline-flex items-center justify-center rounded-2xl border border-[#2E5A3E] bg-[#0B1B12] px-4 py-3 text-sm font-semibold text-white/90 hover:bg-[#0E2418]"
+                    className="inline-flex items-center justify-center rounded-2xl border border-[#1E4F3B] bg-[#06110C] px-4 py-3 text-sm font-semibold text-white/90 hover:bg-[#0A1B13]"
                   >
                     Copy Maps link
                   </button>
                   <button
                     type="button"
                     onClick={() => onCopy(address, "Address copied")}
-                    className="inline-flex items-center justify-center rounded-2xl border border-[#2E5A3E] bg-[#0B1B12] px-4 py-3 text-sm font-semibold text-white/90 hover:bg-[#0E2418]"
+                    className="inline-flex items-center justify-center rounded-2xl border border-[#1E4F3B] bg-[#06110C] px-4 py-3 text-sm font-semibold text-white/90 hover:bg-[#0A1B13]"
                   >
                     Copy address
                   </button>
                   <button
                     type="button"
                     onClick={onShareAddress}
-                    className="inline-flex items-center justify-center rounded-2xl border border-[#2E5A3E] bg-[#0B1B12] px-4 py-3 text-sm font-semibold text-white/90 hover:bg-[#0E2418]"
+                    className="inline-flex items-center justify-center rounded-2xl border border-[#1E4F3B] bg-[#06110C] px-4 py-3 text-sm font-semibold text-white/90 hover:bg-[#0A1B13]"
                   >
                     Share
                   </button>
