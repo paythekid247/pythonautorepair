@@ -35,7 +35,7 @@ const POPULAR_MAKES: PopularMake[] = [
   "Other",
 ];
 
-const MODELS_BY_MAKE: Record<string, string[]> = {
+const MODELS_BY_MAKE: Record<Exclude<PopularMake, "Other">, string[]> = {
   Toyota: ["Camry", "Corolla", "RAV4", "Highlander", "Tacoma", "Tundra", "Prius", "Sienna"],
   Honda: ["Civic", "Accord", "CR-V", "Pilot", "HR-V", "Odyssey"],
   Ford: ["F-150", "Escape", "Explorer", "Edge", "Mustang", "Bronco"],
@@ -58,6 +58,8 @@ function yearsList(minYear = 1990) {
   return arr;
 }
 
+type MakeState = "" | PopularMake;
+
 export default function Page() {
   const SHOP_PHONE_DISPLAY = "(561) 371-5673";
   const SHOP_PHONE_TEL = "+15613715673";
@@ -74,7 +76,7 @@ export default function Page() {
 
   // Vehicle fields
   const [year, setYear] = useState<number | "">("");
-  const [make, setMake] = useState<PopularMake | "">("");
+  const [make, setMake] = useState<MakeState>(""); // ✅ important
   const [model, setModel] = useState("");
   const [otherMake, setOtherMake] = useState("");
   const [otherModel, setOtherModel] = useState("");
@@ -84,8 +86,9 @@ export default function Page() {
   const [submitted, setSubmitted] = useState(false);
 
   const modelOptions = useMemo(() => {
-    if (!make || make === "Other") return [];
-    return MODELS_BY_MAKE[make] || [];
+    // ✅ explicit narrowing so TS stays sane
+    if (make === "" || make === "Other") return [];
+    return MODELS_BY_MAKE[make];
   }, [make]);
 
   function openCameraOrPicker() {
@@ -118,7 +121,6 @@ export default function Page() {
 
   function submitLead(e: React.FormEvent) {
     e.preventDefault();
-    // Front-end only for now. Hook to API/CRM later.
     setSubmitted(true);
   }
 
@@ -150,12 +152,10 @@ export default function Page() {
         />
       </div>
 
-      {/* Visible jungle plants */}
       <JunglePlants />
 
-      {/* Centered container */}
       <div className="mx-auto flex w-full max-w-4xl flex-col items-center px-5">
-        {/* Minimal header w/ your real contact info */}
+        {/* Header */}
         <header className="w-full py-5">
           <div className="flex w-full flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-3">
@@ -213,7 +213,7 @@ export default function Page() {
           </div>
         </header>
 
-        {/* Hero (short) */}
+        {/* Hero */}
         <section className="w-full pb-8 pt-4 text-center">
           <h1 className="text-4xl font-semibold leading-[1.05] tracking-tight md:text-5xl">
             Jungle-fast estimates.
@@ -224,7 +224,7 @@ export default function Page() {
           </p>
         </section>
 
-        {/* Single form card */}
+        {/* Form */}
         <section className="w-full pb-16">
           <div className="rounded-3xl border border-[#1D3B28] bg-[#07140C] p-6">
             {submitted ? (
@@ -248,14 +248,13 @@ export default function Page() {
                       resetForm();
                     }}
                     className="inline-flex items-center justify-center rounded-2xl border border-[#2E5A3E] bg-[#0B1B12] px-5 py-3 text-sm font-semibold text-white/90 hover:bg-[#0E2418]"
-                  >
-                    New estimate
-                  </button>
+                    >
+                      New estimate
+                    </button>
                 </div>
               </div>
             ) : (
               <form onSubmit={submitLead} className="space-y-5">
-                {/* Contact */}
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <Field label="Name">
                     <input
@@ -277,7 +276,6 @@ export default function Page() {
                   </Field>
                 </div>
 
-                {/* Vehicle */}
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                   <Field label="Year">
                     <select
@@ -298,7 +296,7 @@ export default function Page() {
                     <select
                       value={make}
                       onChange={(e) => {
-                        const next = e.target.value as PopularMake;
+                        const next = e.target.value as MakeState;
                         setMake(next);
                         setModel("");
                         setOtherMake("");
@@ -327,7 +325,7 @@ export default function Page() {
                       <select
                         value={model}
                         onChange={(e) => setModel(e.target.value)}
-                        disabled={!make || make === "Other"}
+                        disabled={make === "" || make === "Other"}
                         className="w-full rounded-2xl border border-[#1D3B28] bg-[#050A07] px-4 py-3 text-sm text-white/90 outline-none disabled:opacity-50 focus:border-[#E8D48A]/60"
                       >
                         <option value="">{make ? "Select" : "Pick make first"}</option>
@@ -341,7 +339,6 @@ export default function Page() {
                   </Field>
                 </div>
 
-                {/* If make is Other, ask make text */}
                 {make === "Other" && (
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <Field label="Other make">
@@ -356,7 +353,6 @@ export default function Page() {
                   </div>
                 )}
 
-                {/* Notes */}
                 <Field label="Damage notes (optional)">
                   <textarea
                     value={notes}
@@ -367,7 +363,6 @@ export default function Page() {
                   />
                 </Field>
 
-                {/* Photos */}
                 <div>
                   <div className="flex items-center justify-between">
                     <div className="text-sm font-semibold text-white/85">Photos</div>
@@ -423,7 +418,6 @@ export default function Page() {
                   )}
                 </div>
 
-                {/* Single submit button (python head) */}
                 <div className="pt-2">
                   <button
                     type="submit"
@@ -448,7 +442,6 @@ export default function Page() {
             )}
           </div>
 
-          {/* Footer contact (hyperlinks) */}
           <div className="mt-6 text-center text-xs text-white/55">
             <div className="flex flex-col items-center justify-center gap-1">
               <a
@@ -472,17 +465,13 @@ export default function Page() {
                 {SHOP_ADDRESS}
               </a>
             </div>
-            <div className="mt-2 text-[11px] text-white/40">
-              © {new Date().getFullYear()} Python Auto Repair
-            </div>
+            <div className="mt-2 text-[11px] text-white/40">© {new Date().getFullYear()} Python Auto Repair</div>
           </div>
         </section>
       </div>
     </main>
   );
 }
-
-/* ----------------------------- small components ---------------------------- */
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
@@ -493,7 +482,6 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
   );
 }
 
-/* -------------------------- Python head button icon ------------------------ */
 function PythonHeadIcon({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" className={className} fill="none" aria-hidden="true">
@@ -510,21 +498,14 @@ function PythonHeadIcon({ className }: { className?: string }) {
         strokeLinecap="round"
       />
       <circle cx="14.8" cy="7.2" r="0.9" fill="currentColor" />
-      <path
-        d="M7.3 11.1c-.6 0-1.1.3-1.5.7"
-        stroke="currentColor"
-        strokeWidth="1.6"
-        strokeLinecap="round"
-      />
+      <path d="M7.3 11.1c-.6 0-1.1.3-1.5.7" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
     </svg>
   );
 }
 
-/* ----------------------------- Jungle Plants SVG --------------------------- */
 function JunglePlants() {
   return (
     <div className="pointer-events-none absolute inset-0 -z-10 opacity-80">
-      {/* top-left vines */}
       <svg className="absolute -top-10 -left-10 h-[320px] w-[320px] blur-[0.2px]" viewBox="0 0 300 300" fill="none">
         <path d="M40 20c30 40 30 70 5 115-16 28-8 62 18 86" stroke="rgba(232,212,138,0.18)" strokeWidth="2" />
         <path d="M65 0c25 45 20 85-8 130-15 25-10 52 10 78" stroke="rgba(75,165,110,0.18)" strokeWidth="3" />
@@ -541,7 +522,6 @@ function JunglePlants() {
         />
       </svg>
 
-      {/* bottom-right monstera-ish */}
       <svg className="absolute -bottom-20 -right-24 h-[520px] w-[520px] opacity-80" viewBox="0 0 520 520" fill="none">
         <path
           d="M312 468c88-76 106-193 48-287-43-70-116-104-196-90-71 12-129 63-153 135-22 66-8 145 39 204 62 78 173 101 262 38Z"
