@@ -325,7 +325,7 @@ export default function Page() {
                       <select
                         value={model}
                         onChange={(e) => setModel(e.target.value)}
-                        disabled={make === "" || make === "Other"}
+                        disabled={make === ""}
                         className="w-full rounded-2xl border border-[#1D3B28] bg-[#050A07] px-4 py-3 text-sm text-white/90 outline-none disabled:opacity-50 focus:border-[#E8D48A]/60"
                       >
                         <option value="">{make ? "Select" : "Pick make first"}</option>
