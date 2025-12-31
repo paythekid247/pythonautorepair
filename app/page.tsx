@@ -59,6 +59,7 @@ function yearsList(minYear = 1990) {
 }
 
 type MakeState = "" | PopularMake;
+type ContactMode = "call" | "email" | "directions" | null;
 
 export default function Page() {
   const SHOP_PHONE_DISPLAY = "(561) 371-5673";
@@ -70,13 +71,17 @@ export default function Page() {
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
+  // Contact modal
+  const [contactMode, setContactMode] = useState<ContactMode>(null);
+  const [toast, setToast] = useState<string | null>(null);
+
   // Lead fields
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
 
   // Vehicle fields
   const [year, setYear] = useState<number | "">("");
-  const [make, setMake] = useState<MakeState>(""); // ✅ important
+  const [make, setMake] = useState<MakeState>("");
   const [model, setModel] = useState("");
   const [otherMake, setOtherMake] = useState("");
   const [otherModel, setOtherModel] = useState("");
@@ -86,7 +91,6 @@ export default function Page() {
   const [submitted, setSubmitted] = useState(false);
 
   const modelOptions = useMemo(() => {
-    // ✅ explicit narrowing so TS stays sane
     if (make === "" || make === "Other") return [];
     return MODELS_BY_MAKE[make];
   }, [make]);
@@ -134,6 +138,41 @@ export default function Page() {
     (resolvedMake?.toString().trim().length || 0) > 0 &&
     (resolvedModel?.toString().trim().length || 0) > 0;
 
+  async function copyToClipboard(text: string, label = "Copied") {
+    try {
+      await navigator.clipboard.writeText(text);
+      setToast(label);
+      window.setTimeout(() => setToast(null), 1500);
+    } catch {
+      // Fallback
+      const ta = document.createElement("textarea");
+      ta.value = text;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand("copy");
+      document.body.removeChild(ta);
+      setToast(label);
+      window.setTimeout(() => setToast(null), 1500);
+    }
+  }
+
+  async function shareAddress() {
+    const shareText = `Python Auto Repair\n${SHOP_ADDRESS}\n${SHOP_MAPS_URL}`;
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: "Python Auto Repair",
+          text: `Python Auto Repair\n${SHOP_ADDRESS}`,
+          url: SHOP_MAPS_URL,
+        });
+        return;
+      } catch {
+        // user cancelled or share failed; fall back to copy
+      }
+    }
+    await copyToClipboard(shareText, "Address copied");
+  }
+
   return (
     <main className="relative min-h-screen overflow-hidden bg-[#050A07] text-white">
       {/* Background */}
@@ -154,8 +193,28 @@ export default function Page() {
 
       <JunglePlants />
 
+      {/* Toast */}
+      {toast && (
+        <div className="fixed bottom-6 left-1/2 z-50 -translate-x-1/2 rounded-2xl border border-[#2E5A3E] bg-[#0B1B12]/95 px-4 py-2 text-sm text-white/90 shadow-lg backdrop-blur">
+          {toast}
+        </div>
+      )}
+
+      {/* Contact modal */}
+      <ContactModal
+        mode={contactMode}
+        onClose={() => setContactMode(null)}
+        phoneDisplay={SHOP_PHONE_DISPLAY}
+        phoneTel={SHOP_PHONE_TEL}
+        email={SHOP_EMAIL}
+        address={SHOP_ADDRESS}
+        mapsUrl={SHOP_MAPS_URL}
+        onCopy={copyToClipboard}
+        onShareAddress={shareAddress}
+      />
+
       <div className="mx-auto flex w-full max-w-4xl flex-col items-center px-5">
-        {/* Header */}
+        {/* Header (clean: just the buttons, no repeated text line) */}
         <header className="w-full py-5">
           <div className="flex w-full flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-3">
@@ -169,47 +228,30 @@ export default function Page() {
             </div>
 
             <div className="flex flex-wrap items-center justify-center gap-2 sm:justify-end">
-              <a
-                href={`tel:${SHOP_PHONE_TEL}`}
+              <button
+                type="button"
+                onClick={() => setContactMode("call")}
                 className="rounded-2xl border border-[#2E5A3E] bg-[#0B1B12] px-4 py-2 text-sm font-semibold text-white/90 hover:bg-[#0E2418]"
               >
-                Call {SHOP_PHONE_DISPLAY}
-              </a>
+                Call
+              </button>
 
-              <a
-                href={`mailto:${SHOP_EMAIL}`}
+              <button
+                type="button"
+                onClick={() => setContactMode("email")}
                 className="rounded-2xl border border-[#2E5A3E] bg-[#0B1B12] px-4 py-2 text-sm font-semibold text-white/90 hover:bg-[#0E2418]"
               >
                 Email
-              </a>
+              </button>
 
-              <a
-                href={SHOP_MAPS_URL}
-                target="_blank"
-                rel="noreferrer"
+              <button
+                type="button"
+                onClick={() => setContactMode("directions")}
                 className="rounded-2xl border border-[#2E5A3E] bg-[#0B1B12] px-4 py-2 text-sm font-semibold text-white/90 hover:bg-[#0E2418]"
               >
                 Directions
-              </a>
+              </button>
             </div>
-          </div>
-
-          <div className="mt-3 text-center text-xs text-white/60">
-            <a
-              href={SHOP_MAPS_URL}
-              target="_blank"
-              rel="noreferrer"
-              className="underline decoration-white/20 underline-offset-4 hover:decoration-white/50"
-            >
-              {SHOP_ADDRESS}
-            </a>{" "}
-            •{" "}
-            <a
-              href={`mailto:${SHOP_EMAIL}`}
-              className="underline decoration-white/20 underline-offset-4 hover:decoration-white/50"
-            >
-              {SHOP_EMAIL}
-            </a>
           </div>
         </header>
 
@@ -230,17 +272,16 @@ export default function Page() {
             {submitted ? (
               <div className="rounded-2xl border border-[#2E5A3E] bg-[#0B1B12] p-5 text-center">
                 <div className="text-lg font-semibold text-[#E8D48A]">Submitted ✅</div>
-                <p className="mt-2 text-sm text-white/75">
-                  We’ll contact you soon. If it’s urgent, call now.
-                </p>
+                <p className="mt-2 text-sm text-white/75">We’ll contact you soon.</p>
 
                 <div className="mt-4 flex flex-col items-center justify-center gap-3 sm:flex-row">
-                  <a
-                    href={`tel:${SHOP_PHONE_TEL}`}
+                  <button
+                    type="button"
+                    onClick={() => setContactMode("call")}
                     className="inline-flex items-center justify-center rounded-2xl bg-[#E8D48A] px-5 py-3 text-sm font-semibold text-[#0B0F0C] hover:brightness-95"
                   >
-                    Call now
-                  </a>
+                    Contact shop
+                  </button>
                   <button
                     type="button"
                     onClick={() => {
@@ -248,9 +289,9 @@ export default function Page() {
                       resetForm();
                     }}
                     className="inline-flex items-center justify-center rounded-2xl border border-[#2E5A3E] bg-[#0B1B12] px-5 py-3 text-sm font-semibold text-white/90 hover:bg-[#0E2418]"
-                    >
-                      New estimate
-                    </button>
+                  >
+                    New estimate
+                  </button>
                 </div>
               </div>
             ) : (
@@ -442,30 +483,8 @@ export default function Page() {
             )}
           </div>
 
-          <div className="mt-6 text-center text-xs text-white/55">
-            <div className="flex flex-col items-center justify-center gap-1">
-              <a
-                href={`tel:${SHOP_PHONE_TEL}`}
-                className="underline decoration-white/20 underline-offset-4 hover:decoration-white/50"
-              >
-                {SHOP_PHONE_DISPLAY}
-              </a>
-              <a
-                href={`mailto:${SHOP_EMAIL}`}
-                className="underline decoration-white/20 underline-offset-4 hover:decoration-white/50"
-              >
-                {SHOP_EMAIL}
-              </a>
-              <a
-                href={SHOP_MAPS_URL}
-                target="_blank"
-                rel="noreferrer"
-                className="underline decoration-white/20 underline-offset-4 hover:decoration-white/50"
-              >
-                {SHOP_ADDRESS}
-              </a>
-            </div>
-            <div className="mt-2 text-[11px] text-white/40">© {new Date().getFullYear()} Python Auto Repair</div>
+          <div className="mt-6 text-center text-[11px] text-white/40">
+            © {new Date().getFullYear()} Python Auto Repair
           </div>
         </section>
       </div>
@@ -535,6 +554,135 @@ function JunglePlants() {
       </svg>
 
       <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-[#06110B] to-transparent opacity-70" />
+    </div>
+  );
+}
+
+function ContactModal(props: {
+  mode: ContactMode;
+  onClose: () => void;
+  phoneDisplay: string;
+  phoneTel: string;
+  email: string;
+  address: string;
+  mapsUrl: string;
+  onCopy: (text: string, label?: string) => Promise<void>;
+  onShareAddress: () => Promise<void>;
+}) {
+  const { mode, onClose, phoneDisplay, phoneTel, email, address, mapsUrl, onCopy, onShareAddress } = props;
+
+  if (!mode) return null;
+
+  const title = mode === "call" ? "Call" : mode === "email" ? "Email" : "Directions";
+
+  return (
+    <div className="fixed inset-0 z-50 grid place-items-center bg-black/60 px-4 backdrop-blur-sm" onMouseDown={onClose}>
+      <div
+        className="w-full max-w-md rounded-3xl border border-[#1D3B28] bg-[#07140C] p-5 shadow-2xl"
+        onMouseDown={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between">
+          <div className="text-base font-semibold text-white/90">{title}</div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-xl border border-[#2E5A3E] bg-[#0B1B12] px-3 py-1.5 text-sm text-white/80 hover:bg-[#0E2418]"
+          >
+            Close
+          </button>
+        </div>
+
+        <div className="mt-4 rounded-2xl border border-[#1D3B28] bg-[#050A07] p-4">
+          {mode === "call" && (
+            <>
+              <div className="text-xs text-white/55">Phone</div>
+              <div className="mt-1 text-lg font-semibold text-white/90">{phoneDisplay}</div>
+
+              <div className="mt-4 flex flex-col gap-2 sm:flex-row">
+                <a
+                  href={`tel:${phoneTel}`}
+                  className="inline-flex flex-1 items-center justify-center rounded-2xl bg-[#E8D48A] px-4 py-3 text-sm font-semibold text-[#0B0F0C] hover:brightness-95"
+                >
+                  Call now
+                </a>
+                <button
+                  type="button"
+                  onClick={() => onCopy(phoneDisplay, "Number copied")}
+                  className="inline-flex flex-1 items-center justify-center rounded-2xl border border-[#2E5A3E] bg-[#0B1B12] px-4 py-3 text-sm font-semibold text-white/90 hover:bg-[#0E2418]"
+                >
+                  Copy
+                </button>
+              </div>
+            </>
+          )}
+
+          {mode === "email" && (
+            <>
+              <div className="text-xs text-white/55">Email</div>
+              <div className="mt-1 text-lg font-semibold text-white/90">{email}</div>
+
+              <div className="mt-4 flex flex-col gap-2 sm:flex-row">
+                <a
+                  href={`mailto:${email}`}
+                  className="inline-flex flex-1 items-center justify-center rounded-2xl bg-[#E8D48A] px-4 py-3 text-sm font-semibold text-[#0B0F0C] hover:brightness-95"
+                >
+                  Compose email
+                </a>
+                <button
+                  type="button"
+                  onClick={() => onCopy(email, "Email copied")}
+                  className="inline-flex flex-1 items-center justify-center rounded-2xl border border-[#2E5A3E] bg-[#0B1B12] px-4 py-3 text-sm font-semibold text-white/90 hover:bg-[#0E2418]"
+                >
+                  Copy
+                </button>
+              </div>
+            </>
+          )}
+
+          {mode === "directions" && (
+            <>
+              <div className="text-xs text-white/55">Address</div>
+              <div className="mt-1 text-base font-semibold text-white/90">{address}</div>
+
+              <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2">
+                <a
+                  href={mapsUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center justify-center rounded-2xl bg-[#E8D48A] px-4 py-3 text-sm font-semibold text-[#0B0F0C] hover:brightness-95"
+                >
+                  Open Maps
+                </a>
+                <button
+                  type="button"
+                  onClick={() => onCopy(mapsUrl, "Maps link copied")}
+                  className="inline-flex items-center justify-center rounded-2xl border border-[#2E5A3E] bg-[#0B1B12] px-4 py-3 text-sm font-semibold text-white/90 hover:bg-[#0E2418]"
+                >
+                  Copy Maps link
+                </button>
+                <button
+                  type="button"
+                  onClick={() => onCopy(address, "Address copied")}
+                  className="inline-flex items-center justify-center rounded-2xl border border-[#2E5A3E] bg-[#0B1B12] px-4 py-3 text-sm font-semibold text-white/90 hover:bg-[#0E2418]"
+                >
+                  Copy address
+                </button>
+                <button
+                  type="button"
+                  onClick={onShareAddress}
+                  className="inline-flex items-center justify-center rounded-2xl border border-[#2E5A3E] bg-[#0B1B12] px-4 py-3 text-sm font-semibold text-white/90 hover:bg-[#0E2418]"
+                >
+                  Share
+                </button>
+              </div>
+
+              <div className="mt-3 text-xs text-white/50">
+                “Share” uses your phone’s share sheet when available (Message/WhatsApp/Telegram).
+              </div>
+            </>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
