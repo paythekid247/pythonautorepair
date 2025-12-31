@@ -35,805 +35,1151 @@ const POPULAR_MAKES: PopularMake[] = [
   "Other",
 ];
 
-const MODELS_BY_MAKE: Record<Exclude<PopularMake, "Other">, string[]> = {
-  Toyota: ["Camry", "Corolla", "RAV4", "Highlander", "Tacoma", "Tundra", "Prius", "Sienna"],
-  Honda: ["Civic", "Accord", "CR-V", "Pilot", "HR-V", "Odyssey"],
-  Ford: ["F-150", "Escape", "Explorer", "Edge", "Mustang", "Bronco"],
-  Chevrolet: ["Silverado", "Equinox", "Tahoe", "Suburban", "Malibu", "Traverse"],
-  Nissan: ["Altima", "Sentra", "Rogue", "Pathfinder", "Frontier"],
-  Hyundai: ["Elantra", "Sonata", "Tucson", "Santa Fe", "Palisade"],
-  Kia: ["Forte", "K5", "Sportage", "Sorento", "Telluride"],
-  Jeep: ["Wrangler", "Grand Cherokee", "Cherokee", "Compass", "Gladiator"],
-  Subaru: ["Outback", "Forester", "Crosstrek", "Impreza", "Ascent"],
-  Volkswagen: ["Jetta", "Passat", "Tiguan", "Atlas", "Golf"],
-  BMW: ["3 Series", "5 Series", "X3", "X5", "X1"],
-  "Mercedes-Benz": ["C-Class", "E-Class", "GLC", "GLE", "A-Class"],
-  Tesla: ["Model 3", "Model Y", "Model S", "Model X"],
+const POPULAR_MODELS_BY_MAKE: Record<
+  Exclude<PopularMake, "Other">,
+  string[]
+> = {
+  Toyota: [
+    "Camry",
+    "Corolla",
+    "RAV4",
+    "Highlander",
+    "Tacoma",
+    "Tundra",
+    "4Runner",
+    "Prius",
+    "Sienna",
+    "Avalon",
+  ],
+  Honda: [
+    "Civic",
+    "Accord",
+    "CR-V",
+    "HR-V",
+    "Pilot",
+    "Odyssey",
+    "Ridgeline",
+    "Fit",
+    "Passport",
+  ],
+  Ford: [
+    "F-150",
+    "Escape",
+    "Explorer",
+    "Edge",
+    "Bronco",
+    "Ranger",
+    "Mustang",
+    "Expedition",
+    "Fusion",
+  ],
+  Chevrolet: [
+    "Silverado 1500",
+    "Equinox",
+    "Tahoe",
+    "Suburban",
+    "Traverse",
+    "Malibu",
+    "Colorado",
+    "Camaro",
+    "Blazer",
+  ],
+  Nissan: [
+    "Altima",
+    "Sentra",
+    "Rogue",
+    "Pathfinder",
+    "Murano",
+    "Frontier",
+    "Maxima",
+    "Versa",
+  ],
+  Hyundai: [
+    "Elantra",
+    "Sonata",
+    "Tucson",
+    "Santa Fe",
+    "Kona",
+    "Palisade",
+    "Accent",
+  ],
+  Kia: [
+    "Forte",
+    "K5",
+    "Sportage",
+    "Sorento",
+    "Telluride",
+    "Soul",
+    "Rio",
+  ],
+  Jeep: [
+    "Wrangler",
+    "Grand Cherokee",
+    "Cherokee",
+    "Compass",
+    "Renegade",
+    "Gladiator",
+  ],
+  Subaru: [
+    "Outback",
+    "Forester",
+    "Crosstrek",
+    "Impreza",
+    "Legacy",
+    "Ascent",
+    "WRX",
+  ],
+  Volkswagen: ["Jetta", "Passat", "Tiguan", "Atlas", "Golf", "Taos"],
+  BMW: ["3 Series", "5 Series", "X3", "X5", "X1", "4 Series", "7 Series"],
+  "Mercedes-Benz": ["C-Class", "E-Class", "GLC", "GLE", "A-Class", "S-Class"],
+  Tesla: ["Model 3", "Model Y", "Model S", "Model X", "Cybertruck"],
 };
 
-function yearsList(minYear = 1990) {
-  const now = new Date().getFullYear();
-  const arr: number[] = [];
-  for (let y = now + 1; y >= minYear; y--) arr.push(y);
-  return arr;
+const YEARS: string[] = Array.from({ length: 28 }, (_, i) =>
+  String(new Date().getFullYear() - i)
+);
+
+function normalizeVin(raw: string) {
+  return (raw || "")
+    .toUpperCase()
+    .replace(/[^A-Z0-9]/g, "")
+    .replace(/[IOQ]/g, "");
 }
 
-type MakeState = "" | PopularMake;
-type ContactMode = "call" | "email" | "directions" | null;
+function clampText(s: string, max = 2000) {
+  if (!s) return "";
+  return s.length > max ? s.slice(0, max) + "…" : s;
+}
+
+async function safeCopy(text: string) {
+  try {
+    await navigator.clipboard.writeText(text);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function caseInsensitiveFind(options: string[], target: string) {
+  const t = (target || "").trim().toLowerCase();
+  if (!t) return null;
+  return options.find((o) => o.toLowerCase() === t) ?? null;
+}
 
 export default function Page() {
-  // Shop constants
-  const SHOP_PHONE_DISPLAY = "(561) 371-5673";
-  const SHOP_PHONE_TEL = "+15613715673";
-  const SHOP_EMAIL = "info@pythonautorepair.com";
-  const SHOP_ADDRESS = "1114 NE 4th Ave, Fort Lauderdale, FL 33304";
-  const SHOP_MAPS_URL =
-    "https://www.google.com/maps/search/?api=1&query=1114%20NE%204th%20Ave%2C%20Fort%20Lauderdale%2C%20FL%2033304";
+  // BUSINESS INFO
+  const BUSINESS_NAME = "Python Auto Repair";
+  const BUSINESS_PHONE_PRETTY = "(561) 371-5673";
+  const BUSINESS_PHONE_E164 = "+15613715673";
+  const BUSINESS_EMAIL = "info@pythonautorepair.com";
+  const BUSINESS_ADDRESS = "1114 NE 4th Ave, Fort Lauderdale, FL 33304";
 
-  // Reviews (your real links)
-  const GOOGLE_REVIEWS_URL = "https://share.google/9i2bJ7yiL59seKe33";
-  const GOOGLE_WRITE_REVIEW_URL =
-    "https://www.google.com/search?sca_esv=d3ad5c95999e7e6c&authuser=1&sxsrf=AE3TifO2B9vg7yqW0JiJfxKytVtxrOMD_Q:1767203095401&si=AMgyJEtREmoPL4P1I5IDCfuA8gybfVI2d5Uj7QMwYCZHKDZ-E-DDUNWo-GSSEVv0-ca8WGcY0XdNhEjstAhidT6zNqG-9BaKDHmiNYhIbdkfJgV9G235fwqFKK8c4MNtZdF0ozJ3f1NVPzLg2p0mopier6SVzNh5Bw%3D%3D&q=Python+Auto+Repair+Reviews&sa=X&ved=2ahUKEwjlhf3FsOiRAxWERzABHQ93KDEQ0bkNegQIKBAE&biw=643&bih=738&dpr=1.75#lrd=0x88d90157a8dfd125:0xbc74768f80596ea4,3,,,,";
-  const YELP_URL = ""; // optional
-  const FACEBOOK_URL = ""; // optional
+  const googleMapsLink = useMemo(
+    () =>
+      `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+        BUSINESS_ADDRESS
+      )}`,
+    [BUSINESS_ADDRESS]
+  );
 
-  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  // CUSTOMER INFO (optional)
+  const [name, setName] = useState("");
+  const [customerPhone, setCustomerPhone] = useState("");
+  const [location, setLocation] = useState("");
 
-  // Bottom sheet
-  const [contactMode, setContactMode] = useState<ContactMode>(null);
+  // VEHICLE
+  const [vin, setVin] = useState("");
+  const [noVinAccess, setNoVinAccess] = useState(false);
+  const [year, setYear] = useState("");
+  const [make, setMake] = useState<PopularMake | "">("");
+
+  // Model dropdown + Other
+  const [modelChoice, setModelChoice] = useState<string>("");
+  const [modelOther, setModelOther] = useState<string>("");
+
+  // VIN HELP + SCANNER
+  const [showVinHelp, setShowVinHelp] = useState(false);
+  const [showVinScanner, setShowVinScanner] = useState(false);
+  const [vinBusy, setVinBusy] = useState(false);
+  const [vinError, setVinError] = useState<string | null>(null);
+
+  // CONTACT MODALS
+  const [contactModal, setContactModal] = useState<
+    null | "phone" | "email" | "address"
+  >(null);
+
+  // PHOTOS + DESCRIPTION
+  const [photos, setPhotos] = useState<File[]>([]);
+  const [damageDescription, setDamageDescription] = useState("");
+
+  // SUBMIT
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [result, setResult] = useState<any>(null);
+
+  // UI feedback
   const [toast, setToast] = useState<string | null>(null);
 
-  // Lead fields
-  const [name, setName] = useState("");
-  const [phone, setPhone] = useState("");
-
-  // Vehicle fields
-  const [year, setYear] = useState<number | "">("");
-  const [make, setMake] = useState<MakeState>("");
-  const [model, setModel] = useState("");
-  const [otherMake, setOtherMake] = useState("");
-  const [otherModel, setOtherModel] = useState("");
-
-  const [notes, setNotes] = useState("");
-  const [photos, setPhotos] = useState<File[]>([]);
-  const [submitted, setSubmitted] = useState(false);
+  const albumVinRef = useRef<HTMLInputElement | null>(null);
+  const cameraVinRef = useRef<HTMLInputElement | null>(null);
+  const cameraDamageRef = useRef<HTMLInputElement | null>(null);
+  const uploadDamageRef = useRef<HTMLInputElement | null>(null);
 
   const modelOptions = useMemo(() => {
-    if (make === "" || make === "Other") return [];
-    return MODELS_BY_MAKE[make];
+    if (!make || make === "Other") return ["Other"];
+    const list = POPULAR_MODELS_BY_MAKE[make as Exclude<PopularMake, "Other">] || [];
+    return [...list, "Other"];
   }, [make]);
 
-  function openCameraOrPicker() {
-    fileInputRef.current?.click();
+  const selectedModel = useMemo(() => {
+    if (!modelChoice) return "";
+    if (modelChoice === "Other") return (modelOther || "").trim();
+    return modelChoice;
+  }, [modelChoice, modelOther]);
+
+  const hasValidVin = useMemo(() => normalizeVin(vin).length === 17, [vin]);
+
+  const hasManualVehicle = useMemo(() => {
+    return Boolean(year && make && selectedModel);
+  }, [year, make, selectedModel]);
+
+  const canUseCamera = useMemo(
+    () => !noVinAccess && hasValidVin,
+    [noVinAccess, hasValidVin]
+  );
+
+  const canUploadPhotos = useMemo(
+    () => (!noVinAccess && hasValidVin) || (noVinAccess && hasManualVehicle),
+    [noVinAccess, hasValidVin, hasManualVehicle]
+  );
+
+  function showToast(msg: string) {
+    setToast(msg);
+    window.setTimeout(() => setToast(null), 1600);
   }
 
-  function onFilesSelected(e: React.ChangeEvent<HTMLInputElement>) {
-    const files = Array.from(e.target.files || []);
-    if (!files.length) return;
-    const next = [...photos, ...files].slice(0, 8);
-    setPhotos(next);
-    e.target.value = "";
+  async function doCopy(text: string, label: string) {
+    const ok = await safeCopy(text);
+    showToast(ok ? `${label} copied` : "Copy failed");
   }
 
-  function removePhoto(index: number) {
-    setPhotos((prev) => prev.filter((_, i) => i !== index));
+  async function doShare(payload: { title: string; text?: string; url?: string }) {
+    try {
+      // @ts-ignore
+      if (navigator.share) {
+        // @ts-ignore
+        await navigator.share(payload);
+        return true;
+      }
+      return false;
+    } catch {
+      return false;
+    }
   }
 
-  function resetForm() {
-    setName("");
-    setPhone("");
+  function resetManualVehicleFields() {
     setYear("");
     setMake("");
-    setModel("");
-    setOtherMake("");
-    setOtherModel("");
-    setNotes("");
+    setModelChoice("");
+    setModelOther("");
+  }
+
+  function setMakeAndPopularModel(decodedMake: string, decodedModel: string) {
+    // make
+    const matchedMake =
+      POPULAR_MAKES.find((m) => m.toLowerCase() === decodedMake.toLowerCase()) ||
+      "Other";
+    setMake(matchedMake as PopularMake);
+
+    // model
+    if (matchedMake && matchedMake !== "Other") {
+      const opts = [...(POPULAR_MODELS_BY_MAKE[matchedMake as Exclude<PopularMake, "Other">] || []), "Other"];
+      const found = caseInsensitiveFind(opts, decodedModel);
+      if (found && found !== "Other") {
+        setModelChoice(found);
+        setModelOther("");
+      } else {
+        setModelChoice("Other");
+        setModelOther(decodedModel || "");
+      }
+    } else {
+      // Unknown make -> force Other model text
+      setModelChoice("Other");
+      setModelOther(decodedModel || "");
+    }
+  }
+
+  async function decodeVinAndPopulate(v: string) {
+    const cleaned = normalizeVin(v);
+    if (cleaned.length !== 17) throw new Error("VIN must be 17 characters.");
+
+    const res = await fetch("/api/vin/decode", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ vin: cleaned }),
+    });
+
+    const data = await res.json();
+    if (!res.ok || !data?.ok) throw new Error(data?.error || "VIN decode failed.");
+
+    setVin(cleaned);
+    setYear(String(data.year || ""));
+
+    const decodedMake = String(data.make || "");
+    const decodedModel = String(data.model || "");
+
+    setMakeAndPopularModel(decodedMake, decodedModel);
+  }
+
+  async function extractVinFromImage(file: File): Promise<string> {
+    const base64 = await new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(String(reader.result).split(",")[1] || "");
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+
+    const res = await fetch("/api/vin/extract", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        imageBase64: base64,
+        mimeType: file.type || "image/jpeg",
+      }),
+    });
+
+    const data = await res.json();
+    if (!res.ok || !data?.ok)
+      throw new Error(data?.error || "Could not read VIN from image.");
+    return String(data.vin || "");
+  }
+
+  async function handleVinFromImage(file: File) {
+    setVinError(null);
+    setVinBusy(true);
+    try {
+      const extracted = await extractVinFromImage(file);
+      await decodeVinAndPopulate(extracted);
+      setNoVinAccess(false);
+      setShowVinScanner(false);
+    } catch (e: any) {
+      setVinError(e?.message || "VIN scan failed.");
+    } finally {
+      setVinBusy(false);
+    }
+  }
+
+  function goManualVehicle() {
+    setNoVinAccess(true);
+    setVinError(null);
+    setVin("");
+    resetManualVehicleFields();
     setPhotos([]);
   }
 
-  function submitLead(e: React.FormEvent) {
-    e.preventDefault();
-    setSubmitted(true);
+  function clearVinAndVehicle() {
+    setVin("");
+    setVinError(null);
+    setNoVinAccess(false);
+    resetManualVehicleFields();
+    setPhotos([]);
   }
 
-  const resolvedMake = make === "Other" ? otherMake.trim() : make;
-  const resolvedModel = make === "Other" ? otherModel.trim() : model;
+  async function submitEstimate() {
+    setSubmitError(null);
+    setResult(null);
 
-  const canSubmit =
-    name.trim().length > 0 &&
-    phone.trim().length >= 7 &&
-    year !== "" &&
-    (resolvedMake?.toString().trim().length || 0) > 0 &&
-    (resolvedModel?.toString().trim().length || 0) > 0;
-
-  async function copyToClipboard(text: string, label = "Copied") {
-    try {
-      await navigator.clipboard.writeText(text);
-      setToast(label);
-      window.setTimeout(() => setToast(null), 1500);
-    } catch {
-      const ta = document.createElement("textarea");
-      ta.value = text;
-      document.body.appendChild(ta);
-      ta.select();
-      document.execCommand("copy");
-      document.body.removeChild(ta);
-      setToast(label);
-      window.setTimeout(() => setToast(null), 1500);
+    if (!damageDescription || damageDescription.trim().length < 10) {
+      setSubmitError("Please add a little more detail about the damage.");
+      return;
     }
-  }
 
-  async function shareAddress() {
-    const shareText = `Python Auto Repair\n${SHOP_ADDRESS}\n${SHOP_MAPS_URL}`;
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: "Python Auto Repair",
-          text: `Python Auto Repair\n${SHOP_ADDRESS}`,
-          url: SHOP_MAPS_URL,
-        });
+    if (!noVinAccess) {
+      if (!hasValidVin) {
+        setSubmitError("Please scan or enter a valid VIN (17 characters).");
         return;
-      } catch {
-        // user canceled; fall back to copy
+      }
+    } else {
+      if (!hasManualVehicle) {
+        setSubmitError("Please select Year, Make, and Model.");
+        return;
       }
     }
-    await copyToClipboard(shareText, "Address copied");
+
+    setSubmitting(true);
+    try {
+      const payload = {
+        name: name.trim() || undefined,
+        phone: customerPhone.trim() || undefined,
+        location: location.trim() || undefined,
+        vin: !noVinAccess && vin ? normalizeVin(vin) : undefined,
+        year: year || undefined,
+        make: make || undefined,
+        model: selectedModel || undefined,
+        damageDescription: clampText(damageDescription, 2000),
+      };
+
+      const res = await fetch("/api/estimate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await res.json();
+      if (!res.ok || !data?.ok) throw new Error(data?.error || "Estimate failed.");
+
+      setResult(data);
+    } catch (e: any) {
+      setSubmitError(e?.message || "Something went wrong.");
+    } finally {
+      setSubmitting(false);
+    }
   }
 
-  const hasYelp = !!YELP_URL.trim();
-  const hasFacebook = !!FACEBOOK_URL.trim();
+  const heroMinHeight = "min-h-[320px] sm:min-h-[360px] lg:min-h-[420px]";
 
   return (
-    <main className="relative min-h-screen overflow-hidden bg-[#040706] text-white">
-      {/* Background (black + forest green + exotic accents) */}
-      <div className="pointer-events-none absolute inset-0 -z-10">
-        <div className="absolute inset-0 bg-gradient-to-b from-[#020403] via-[#040706] to-[#040706]" />
-        <div className="absolute -top-28 left-1/2 h-[560px] w-[980px] -translate-x-1/2 rounded-full bg-[#0E2F1D]/40 blur-3xl" />
-        <div className="absolute top-[30%] left-[-12%] h-[460px] w-[460px] rounded-full bg-[#0A2416]/40 blur-3xl" />
-        <div className="absolute bottom-[-14%] right-[-14%] h-[560px] w-[560px] rounded-full bg-[#123A23]/28 blur-3xl" />
-
-        {/* exotic accents */}
-        <div className="absolute top-[18%] right-[8%] h-[240px] w-[240px] rounded-full bg-[#0F3D2A]/25 blur-3xl" />
-        <div className="absolute bottom-[18%] left-[10%] h-[240px] w-[240px] rounded-full bg-[#2A1B3D]/12 blur-3xl" />
-        <div className="absolute bottom-[10%] right-[38%] h-[220px] w-[220px] rounded-full bg-[#1E4F3B]/18 blur-3xl" />
-
-        <div
-          className="absolute inset-0 opacity-[0.09]"
-          style={{
-            backgroundImage:
-              "radial-gradient(circle at 1px 1px, rgba(255,255,255,0.33) 1px, transparent 0)",
-            backgroundSize: "26px 26px",
-          }}
-        />
-      </div>
-
-      {/* decorative “lush” look without saying jungle */}
-      <SerpentCanopy />
-
-      {/* Toast */}
-      {toast && (
-        <div className="fixed bottom-6 left-1/2 z-50 -translate-x-1/2 rounded-2xl border border-[#1E4F3B] bg-[#06110C]/95 px-4 py-2 text-sm text-white/90 shadow-lg backdrop-blur">
-          {toast}
+    <main className="min-h-screen bg-[#050b08] text-white">
+      <div className="relative">
+        {/* HERO BACKGROUND */}
+        <div className="absolute inset-0">
+          <img
+            src="/images/classic_car_1.jpg"
+            alt="Classic car"
+            className="h-full w-full object-cover object-center"
+          />
+          <div className="absolute inset-0 bg-black/70" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(34,197,94,0.22),transparent_45%),radial-gradient(circle_at_80%_30%,rgba(16,185,129,0.16),transparent_45%)]" />
+          <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(0,0,0,0.10),rgba(5,11,8,0.96))]" />
         </div>
-      )}
 
-      {/* Contact bottom sheet */}
-      <ContactSheet
-        mode={contactMode}
-        onClose={() => setContactMode(null)}
-        phoneDisplay={SHOP_PHONE_DISPLAY}
-        phoneTel={SHOP_PHONE_TEL}
-        email={SHOP_EMAIL}
-        address={SHOP_ADDRESS}
-        mapsUrl={SHOP_MAPS_URL}
-        onCopy={copyToClipboard}
-        onShareAddress={shareAddress}
-      />
+        <div className="relative mx-auto max-w-5xl px-4 pt-10 sm:pt-14">
+          <div className={`${heroMinHeight} flex flex-col justify-center`}>
+            <header className="flex flex-col items-center gap-5 text-center">
+              <div>
+                <h1 className="text-3xl font-extrabold tracking-tight sm:text-5xl">
+                  {BUSINESS_NAME}
+                </h1>
 
-      <div className="mx-auto flex w-full max-w-4xl flex-col items-center px-5">
-        {/* Header */}
-        <header className="w-full py-5">
-          <div className="flex w-full flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex items-center gap-3">
-              <div className="grid h-10 w-10 place-items-center rounded-2xl border border-[#15402F] bg-[#06110C]">
-                <span className="text-sm font-semibold text-[#34D399]">AI</span>
+                {/* 3 Buttons: Call / Email / Get Address */}
+                <div className="mt-4 flex flex-col items-center justify-center gap-2 sm:flex-row sm:gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setContactModal("phone")}
+                    className="w-full sm:w-auto rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-sm font-extrabold hover:bg-white/15"
+                  >
+                    Call
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setContactModal("email")}
+                    className="w-full sm:w-auto rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-sm font-extrabold hover:bg-white/15"
+                  >
+                    Email
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setContactModal("address")}
+                    className="w-full sm:w-auto rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-sm font-extrabold hover:bg-white/15"
+                  >
+                    Get Address
+                  </button>
+                </div>
+
+                <div className="mt-3 text-xs text-white/70">
+                  {BUSINESS_ADDRESS} • {BUSINESS_PHONE_PRETTY}
+                </div>
+
+                <div className="mt-4 inline-flex flex-col gap-1 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-left text-xs text-white/75">
+                  <div className="font-semibold text-white/90">Hours</div>
+                  <div>Monday: 8:30 AM–6 PM</div>
+                  <div>Tuesday: 8:30 AM–12 AM</div>
+                  <div>Wednesday: 12–6 AM, 8:30 AM–6 PM</div>
+                  <div>Thursday: 8:30 AM–6 PM</div>
+                  <div>Friday: 8:30 AM–6 PM</div>
+                  <div>Saturday: 8:30 AM–5 PM</div>
+                  <div>Sunday: Closed</div>
+                </div>
               </div>
-              <div className="leading-tight">
-                <div className="text-sm font-semibold tracking-wide">Python Auto Repair</div>
-                <div className="text-xs text-white/65">Fort Lauderdale • Fast photo estimates</div>
+
+              <p className="max-w-2xl text-white/85">
+                Get a fast estimate range by sharing the VIN, damage details, and photos.
+              </p>
+            </header>
+          </div>
+
+          {/* CARD */}
+          <div className="mt-6 rounded-3xl border border-white/10 bg-white/5 p-5 shadow-[0_0_0_1px_rgba(255,255,255,0.04)] backdrop-blur-sm sm:p-7">
+            {/* CUSTOMER (OPTIONAL) */}
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+              <div>
+                <label className="text-sm text-white/70">Name (optional)</label>
+                <input
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="mt-2 w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-white placeholder:text-white/30 outline-none focus:border-emerald-400/40"
+                  placeholder="John"
+                  disabled={submitting}
+                />
+              </div>
+              <div>
+                <label className="text-sm text-white/70">Phone (optional)</label>
+                <input
+                  value={customerPhone}
+                  onChange={(e) => setCustomerPhone(e.target.value)}
+                  className="mt-2 w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-white placeholder:text-white/30 outline-none focus:border-emerald-400/40"
+                  placeholder="+1 561..."
+                  disabled={submitting}
+                />
+              </div>
+              <div>
+                <label className="text-sm text-white/70">City/Zip (optional)</label>
+                <input
+                  value={location}
+                  onChange={(e) => setLocation(e.target.value)}
+                  className="mt-2 w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-white placeholder:text-white/30 outline-none focus:border-emerald-400/40"
+                  placeholder="Fort Lauderdale, 33304"
+                  disabled={submitting}
+                />
               </div>
             </div>
 
-            <div className="flex flex-wrap items-center justify-center gap-2 sm:justify-end">
-              <button
-                type="button"
-                onClick={() => setContactMode("call")}
-                className="rounded-2xl border border-[#1E4F3B] bg-[#06110C] px-4 py-2 text-sm font-semibold text-white/90 hover:bg-[#0A1B13]"
-              >
-                Call
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setContactMode("email")}
-                className="rounded-2xl border border-[#1E4F3B] bg-[#06110C] px-4 py-2 text-sm font-semibold text-white/90 hover:bg-[#0A1B13]"
-              >
-                Email
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setContactMode("directions")}
-                className="rounded-2xl border border-[#1E4F3B] bg-[#06110C] px-4 py-2 text-sm font-semibold text-white/90 hover:bg-[#0A1B13]"
-              >
-                Directions
-              </button>
-            </div>
-          </div>
-        </header>
-
-        {/* Hero */}
-        <section className="w-full pb-8 pt-4 text-center">
-          <div className="mx-auto inline-flex items-center gap-2 rounded-full border border-[#15402F] bg-[#06110C]/70 px-4 py-2 text-xs text-white/70">
-            <span className="h-2 w-2 rounded-full bg-[#34D399]" />
-            Python-fast • precise • strong
-          </div>
-
-          <h1 className="mt-4 text-4xl font-semibold leading-[1.05] tracking-tight md:text-5xl">
-            Python-fast estimates.
-            <span className="block text-[#34D399]">Upload. Submit. Done.</span>
-          </h1>
-
-          <p className="mx-auto mt-3 max-w-2xl text-sm text-white/70 md:text-base">
-            Works on iPhone and Android. Tap the python head, add photos, and we’ll respond quickly with next steps.
-          </p>
-
-          <div className="mx-auto mt-5 flex max-w-2xl flex-wrap items-center justify-center gap-2 text-[11px] text-white/55">
-            <span className="rounded-full border border-[#15402F] bg-[#06110C]/60 px-3 py-1">Collision</span>
-            <span className="rounded-full border border-[#15402F] bg-[#06110C]/60 px-3 py-1">Scratches</span>
-            <span className="rounded-full border border-[#15402F] bg-[#06110C]/60 px-3 py-1">Bumper</span>
-            <span className="rounded-full border border-[#15402F] bg-[#06110C]/60 px-3 py-1">Dent repair</span>
-            <span className="rounded-full border border-[#15402F] bg-[#06110C]/60 px-3 py-1">Paint</span>
-          </div>
-        </section>
-
-        {/* Form */}
-        <section className="w-full pb-10">
-          <div className="rounded-3xl border border-[#15402F] bg-[#06110C] p-6 shadow-[0_20px_80px_rgba(0,0,0,0.45)]">
-            {submitted ? (
-              <div className="rounded-2xl border border-[#1E4F3B] bg-[#040706] p-5 text-center">
-                <div className="text-lg font-semibold text-[#34D399]">Submitted ✅</div>
-                <p className="mt-2 text-sm text-white/75">We’ll contact you soon.</p>
-
-                <div className="mt-4 flex flex-col items-center justify-center gap-3 sm:flex-row">
-                  <button
-                    type="button"
-                    onClick={() => setContactMode("call")}
-                    className="inline-flex items-center justify-center rounded-2xl bg-[#34D399] px-5 py-3 text-sm font-semibold text-[#06110C] hover:brightness-95"
-                  >
-                    Contact shop
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setSubmitted(false);
-                      resetForm();
-                    }}
-                    className="inline-flex items-center justify-center rounded-2xl border border-[#1E4F3B] bg-[#06110C] px-5 py-3 text-sm font-semibold text-white/90 hover:bg-[#0A1B13]"
-                  >
-                    New estimate
-                  </button>
+            {/* VIN SECTION */}
+            <div className="mt-7">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <h2 className="text-lg font-bold">Vehicle Identification</h2>
+                  <p className="text-sm text-white/60">
+                    Scan the VIN to auto-fill vehicle details.
+                  </p>
                 </div>
+
+                <button
+                  type="button"
+                  onClick={() => setShowVinHelp(true)}
+                  className="text-sm underline text-white/60 hover:text-white"
+                >
+                  Don’t know where to find the VIN?
+                </button>
               </div>
-            ) : (
-              <form onSubmit={submitLead} className="space-y-5">
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                  <Field label="Name">
-                    <input
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      placeholder="Your name"
-                      className="w-full rounded-2xl border border-[#15402F] bg-[#040706] px-4 py-3 text-sm text-white/90 placeholder:text-white/35 outline-none focus:border-[#34D399]/70"
-                    />
-                  </Field>
 
-                  <Field label="Phone">
-                    <input
-                      value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
-                      placeholder="(XXX) XXX-XXXX"
-                      inputMode="tel"
-                      className="w-full rounded-2xl border border-[#15402F] bg-[#040706] px-4 py-3 text-sm text-white/90 placeholder:text-white/35 outline-none focus:border-[#34D399]/70"
-                    />
-                  </Field>
-                </div>
-
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-                  <Field label="Year">
-                    <select
-                      value={year}
-                      onChange={(e) => setYear(e.target.value ? Number(e.target.value) : "")}
-                      className="w-full rounded-2xl border border-[#15402F] bg-[#040706] px-4 py-3 text-sm text-white/90 outline-none focus:border-[#34D399]/70"
-                    >
-                      <option value="">Select</option>
-                      {yearsList(1990).map((y) => (
-                        <option key={y} value={y}>
-                          {y}
-                        </option>
-                      ))}
-                    </select>
-                  </Field>
-
-                  <Field label="Make">
-                    <select
-                      value={make}
-                      onChange={(e) => {
-                        const next = e.target.value as MakeState;
-                        setMake(next);
-                        setModel("");
-                        setOtherMake("");
-                        setOtherModel("");
-                      }}
-                      className="w-full rounded-2xl border border-[#15402F] bg-[#040706] px-4 py-3 text-sm text-white/90 outline-none focus:border-[#34D399]/70"
-                    >
-                      <option value="">Select</option>
-                      {POPULAR_MAKES.map((m) => (
-                        <option key={m} value={m}>
-                          {m}
-                        </option>
-                      ))}
-                    </select>
-                  </Field>
-
-                  <Field label="Model">
-                    {make === "Other" ? (
-                      <input
-                        value={otherModel}
-                        onChange={(e) => setOtherModel(e.target.value)}
-                        placeholder="Model"
-                        className="w-full rounded-2xl border border-[#15402F] bg-[#040706] px-4 py-3 text-sm text-white/90 placeholder:text-white/35 outline-none focus:border-[#34D399]/70"
-                      />
-                    ) : (
-                      <select
-                        value={model}
-                        onChange={(e) => setModel(e.target.value)}
-                        disabled={make === ""}
-                        className="w-full rounded-2xl border border-[#15402F] bg-[#040706] px-4 py-3 text-sm text-white/90 outline-none disabled:opacity-50 focus:border-[#34D399]/70"
+              {!noVinAccess ? (
+                <>
+                  <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                    <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
+                      <div className="text-sm text-white/70 mb-2">Near your vehicle</div>
+                      <button
+                        type="button"
+                        onClick={() => setShowVinScanner(true)}
+                        className="w-full rounded-xl px-4 py-3 font-semibold bg-white/10 hover:bg-white/15 text-white border border-white/10 disabled:opacity-60"
+                        disabled={vinBusy || submitting}
                       >
-                        <option value="">{make ? "Select" : "Pick make first"}</option>
-                        {modelOptions.map((mo) => (
-                          <option key={mo} value={mo}>
-                            {mo}
+                        {vinBusy ? "Working..." : "Open VIN Scanner"}
+                      </button>
+                    </div>
+
+                    <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
+                      <div className="text-sm text-white/70 mb-2">Have a document photo</div>
+                      <input
+                        ref={albumVinRef}
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={(e) => {
+                          const f = e.target.files?.[0];
+                          if (f) handleVinFromImage(f);
+                          e.currentTarget.value = "";
+                        }}
+                        disabled={vinBusy || submitting}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => albumVinRef.current?.click()}
+                        className="w-full rounded-xl px-4 py-3 font-semibold bg-white/10 hover:bg-white/15 text-white border border-white/10 disabled:opacity-60"
+                        disabled={vinBusy || submitting}
+                      >
+                        {vinBusy ? "Reading..." : "Open Photo Album"}
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
+                    <div className="sm:col-span-2">
+                      <label className="text-sm text-white/70">Enter VIN manually</label>
+                      <input
+                        value={vin}
+                        onChange={(e) => setVin(e.target.value)}
+                        className="mt-2 w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-white placeholder:text-white/30 outline-none focus:border-emerald-400/40 font-mono"
+                        placeholder="17 characters"
+                        disabled={vinBusy || submitting}
+                      />
+                    </div>
+
+                    <div className="sm:col-span-1 flex items-end">
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          setVinError(null);
+                          setVinBusy(true);
+                          try {
+                            await decodeVinAndPopulate(vin);
+                            setNoVinAccess(false);
+                          } catch (e: any) {
+                            setVinError(e?.message || "VIN decode failed.");
+                          } finally {
+                            setVinBusy(false);
+                          }
+                        }}
+                        className="w-full rounded-2xl border border-white/10 bg-emerald-500/20 px-4 py-3 font-semibold hover:bg-emerald-500/25 disabled:opacity-60"
+                        disabled={vinBusy || submitting}
+                      >
+                        Decode VIN
+                      </button>
+                    </div>
+                  </div>
+
+                  {!hasValidVin ? (
+                    <div className="mt-4">
+                      <button
+                        type="button"
+                        onClick={goManualVehicle}
+                        className="w-full rounded-2xl border border-red-500/30 bg-red-500/15 px-5 py-4 text-lg font-extrabold hover:bg-red-500/20 disabled:opacity-60"
+                        disabled={vinBusy || submitting}
+                      >
+                        No access to VIN
+                      </button>
+                    </div>
+                  ) : null}
+
+                  {vinError ? (
+                    <div className="mt-3 rounded-xl border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-200">
+                      {vinError}
+                    </div>
+                  ) : null}
+
+                  {hasValidVin ? (
+                    <div className="mt-3 rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-3 text-sm text-emerald-100">
+                      VIN:{" "}
+                      <span className="font-mono font-semibold">{normalizeVin(vin)}</span>
+                      {year && make && selectedModel ? (
+                        <div className="mt-1 text-white/80">
+                          Vehicle: <b>{year} {make} {selectedModel}</b>
+                        </div>
+                      ) : null}
+                      <button
+                        type="button"
+                        className="mt-2 text-sm underline text-white/70 hover:text-white"
+                        onClick={clearVinAndVehicle}
+                        disabled={vinBusy || submitting}
+                      >
+                        Clear and start over
+                      </button>
+                    </div>
+                  ) : null}
+                </>
+              ) : (
+                <div className="mt-4">
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <h3 className="text-base font-bold">Vehicle Details</h3>
+                      <p className="text-sm text-white/60">
+                        Select popular models or choose Other.
+                      </p>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setNoVinAccess(false);
+                        setSubmitError(null);
+                      }}
+                      className="text-sm underline text-white/60 hover:text-white"
+                      disabled={submitting || vinBusy}
+                    >
+                      I can scan the VIN
+                    </button>
+                  </div>
+
+                  <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
+                    <div>
+                      <label className="text-sm text-white/70">Year</label>
+                      <select
+                        value={year}
+                        onChange={(e) => setYear(e.target.value)}
+                        className="mt-2 w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-white outline-none focus:border-emerald-400/40"
+                        disabled={submitting}
+                      >
+                        <option value="">Select</option>
+                        {YEARS.map((y) => (
+                          <option key={y} value={y}>
+                            {y}
                           </option>
                         ))}
                       </select>
-                    )}
-                  </Field>
+                    </div>
+
+                    <div>
+                      <label className="text-sm text-white/70">Make</label>
+                      <select
+                        value={make}
+                        onChange={(e) => {
+                          const newMake = e.target.value as PopularMake;
+                          setMake(newMake);
+                          // reset model when make changes
+                          setModelChoice("");
+                          setModelOther("");
+                        }}
+                        className="mt-2 w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-white outline-none focus:border-emerald-400/40"
+                        disabled={submitting}
+                      >
+                        <option value="">Select</option>
+                        {POPULAR_MAKES.map((m) => (
+                          <option key={m} value={m}>
+                            {m}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="text-sm text-white/70">Model</label>
+                      <select
+                        value={modelChoice}
+                        onChange={(e) => {
+                          const v = e.target.value;
+                          setModelChoice(v);
+                          if (v !== "Other") setModelOther("");
+                        }}
+                        className="mt-2 w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-white outline-none focus:border-emerald-400/40"
+                        disabled={submitting || !make}
+                      >
+                        <option value="">Select</option>
+                        {modelOptions.map((m) => (
+                          <option key={m} value={m}>
+                            {m}
+                          </option>
+                        ))}
+                      </select>
+
+                      {modelChoice === "Other" ? (
+                        <input
+                          value={modelOther}
+                          onChange={(e) => setModelOther(e.target.value)}
+                          className="mt-2 w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-white placeholder:text-white/30 outline-none focus:border-emerald-400/40"
+                          placeholder="Enter model (example: CX-5, Silverado 2500HD, etc.)"
+                          disabled={submitting}
+                        />
+                      ) : null}
+                    </div>
+                  </div>
                 </div>
+              )}
+            </div>
 
-                {make === "Other" && (
-                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                    <Field label="Other make">
-                      <input
-                        value={otherMake}
-                        onChange={(e) => setOtherMake(e.target.value)}
-                        placeholder="Make"
-                        className="w-full rounded-2xl border border-[#15402F] bg-[#040706] px-4 py-3 text-sm text-white/90 placeholder:text-white/35 outline-none focus:border-[#34D399]/70"
-                      />
-                    </Field>
-                    <div className="hidden sm:block" />
-                  </div>
-                )}
+            {/* PHOTOS */}
+            <div className="mt-7">
+              <h2 className="text-lg font-bold">Photos</h2>
+              <p className="text-sm text-white/60">Add photos of the damaged areas.</p>
 
-                <Field label="Damage notes (optional)">
-                  <textarea
-                    value={notes}
-                    onChange={(e) => setNotes(e.target.value)}
-                    placeholder="Where is the damage? Is it drivable?"
-                    rows={3}
-                    className="w-full resize-none rounded-2xl border border-[#15402F] bg-[#040706] px-4 py-3 text-sm text-white/90 placeholder:text-white/35 outline-none focus:border-[#34D399]/70"
-                  />
-                </Field>
-
-                <div>
-                  <div className="flex items-center justify-between">
-                    <div className="text-sm font-semibold text-white/85">Photos</div>
-                    <div className="text-xs text-white/55">{photos.length}/8</div>
-                  </div>
-
-                  <div className="mt-3 flex flex-col items-center gap-3 sm:flex-row sm:justify-between">
-                    <button
-                      type="button"
-                      onClick={openCameraOrPicker}
-                      className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#34D399] px-5 py-3 text-sm font-semibold text-[#06110C] hover:brightness-95"
-                    >
-                      📸 Add photos
-                    </button>
-
+              <div className="mt-4 flex flex-col gap-2 sm:flex-row">
+                {canUseCamera ? (
+                  <>
                     <input
-                      ref={fileInputRef}
+                      ref={cameraDamageRef}
                       type="file"
                       accept="image/*"
                       capture="environment"
-                      multiple
-                      onChange={onFilesSelected}
                       className="hidden"
+                      onChange={(e) => {
+                        const f = e.target.files?.[0];
+                        if (f) setPhotos((prev) => [...prev, f]);
+                        e.currentTarget.value = "";
+                      }}
+                      disabled={submitting}
                     />
+                    <button
+                      type="button"
+                      onClick={() => cameraDamageRef.current?.click()}
+                      className="w-full sm:w-auto rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-sm font-semibold hover:bg-white/15 disabled:opacity-60"
+                      disabled={submitting}
+                    >
+                      Open Camera
+                    </button>
+                  </>
+                ) : null}
 
-                    <div className="text-xs text-white/60">Best: 1 wide + 2 close-ups.</div>
-                  </div>
+                <input
+                  ref={uploadDamageRef}
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  className="hidden"
+                  onChange={(e) => {
+                    const files = Array.from(e.target.files || []);
+                    if (files.length) setPhotos((prev) => [...prev, ...files]);
+                    e.currentTarget.value = "";
+                  }}
+                  disabled={!canUploadPhotos || submitting}
+                />
+                <button
+                  type="button"
+                  onClick={() => uploadDamageRef.current?.click()}
+                  className={`w-full sm:w-auto rounded-2xl border px-4 py-3 text-sm font-semibold ${
+                    canUploadPhotos
+                      ? "border-white/10 bg-white/10 hover:bg-white/15"
+                      : "border-white/10 bg-white/5 text-white/40 cursor-not-allowed"
+                  }`}
+                  disabled={!canUploadPhotos || submitting}
+                >
+                  Upload Photos
+                </button>
 
-                  {photos.length > 0 && (
-                    <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
-                      {photos.map((file, idx) => (
-                        <div
-                          key={`${file.name}-${idx}`}
-                          className="group relative overflow-hidden rounded-2xl border border-[#15402F] bg-[#040706]"
-                        >
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img alt={`Uploaded ${idx + 1}`} src={URL.createObjectURL(file)} className="h-28 w-full object-cover" />
-                          <button
-                            type="button"
-                            onClick={() => removePhoto(idx)}
-                            className="absolute right-2 top-2 rounded-full border border-[#1E4F3B] bg-[#06110C]/90 px-2 py-1 text-xs text-white/85 opacity-0 backdrop-blur group-hover:opacity-100"
-                            aria-label="Remove photo"
-                          >
-                            ✕
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-
-                <div className="pt-2">
+                {photos.length ? (
                   <button
-                    type="submit"
-                    disabled={!canSubmit}
-                    className="inline-flex w-full items-center justify-center gap-3 rounded-2xl bg-[#34D399] px-6 py-4 text-sm font-semibold text-[#06110C] hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-60"
+                    type="button"
+                    onClick={() => setPhotos([])}
+                    className="w-full sm:w-auto rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-semibold hover:bg-white/10 disabled:opacity-60"
+                    disabled={submitting}
                   >
-                    <PythonHeadIcon className="h-6 w-6 text-[#06110C]" />
-                    Submit for estimate
+                    Clear Photos
                   </button>
+                ) : null}
+              </div>
 
-                  {!canSubmit && (
-                    <div className="mt-2 text-center text-xs text-white/55">
-                      Add name, phone, year, make, and model to submit.
+              {photos.length ? (
+                <div className="mt-3 text-sm text-white/70">
+                  {photos.length} photo{photos.length === 1 ? "" : "s"} selected.
+                </div>
+              ) : null}
+            </div>
+
+            {/* DAMAGE DETAILS */}
+            <div className="mt-7">
+              <h2 className="text-lg font-bold">Damage Details</h2>
+              <p className="text-sm text-white/60">Describe the damage and affected areas.</p>
+
+              <textarea
+                value={damageDescription}
+                onChange={(e) => setDamageDescription(e.target.value)}
+                className="mt-3 w-full min-h-[120px] rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-white placeholder:text-white/30 outline-none focus:border-emerald-400/40"
+                placeholder="Example: Front bumper cracked, hood bent, passenger headlight broken..."
+                disabled={submitting}
+              />
+            </div>
+
+            {/* SUBMIT */}
+            <div className="mt-7">
+              <button
+                type="button"
+                onClick={submitEstimate}
+                disabled={submitting || vinBusy}
+                className="w-full rounded-2xl bg-emerald-500/25 border border-emerald-500/30 px-5 py-4 text-lg font-extrabold hover:bg-emerald-500/30 disabled:opacity-60"
+              >
+                {submitting ? "Sending..." : "Get Estimate"}
+              </button>
+
+              {submitError ? (
+                <div className="mt-3 rounded-xl border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-200">
+                  {submitError}
+                </div>
+              ) : null}
+
+              {result?.ok ? (
+                <div className="mt-4 rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-4">
+                  <div className="font-bold text-emerald-100">Submitted</div>
+                  {result?.estimate?.price?.totalLow != null &&
+                  result?.estimate?.price?.totalHigh != null ? (
+                    <div className="mt-2 text-white/80">
+                      Estimated total:{" "}
+                      <span className="font-extrabold">
+                        ${Number(result.estimate.price.totalLow).toLocaleString()}–$
+                        {Number(result.estimate.price.totalHigh).toLocaleString()}
+                      </span>
                     </div>
-                  )}
+                  ) : null}
+                </div>
+              ) : null}
+            </div>
+          </div>
 
-                  <div className="mt-2 text-center text-[11px] text-white/45">
-                    By submitting, you agree we can contact you by call/text.
+          <footer className="mt-8 pb-10 text-center text-xs text-white/55">
+            Estimates are preliminary and may change after inspection.
+          </footer>
+        </div>
+
+        {/* CONTACT ACTION MODAL */}
+        {contactModal ? (
+          <div className="fixed inset-0 z-[70] flex items-center justify-center p-4">
+            <div
+              className="absolute inset-0 bg-black/70"
+              onClick={() => setContactModal(null)}
+            />
+            <div className="relative w-full max-w-md rounded-3xl border border-white/10 bg-[#07110b] p-5 shadow-2xl">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <h3 className="text-xl font-extrabold">
+                    {contactModal === "phone"
+                      ? "Call"
+                      : contactModal === "email"
+                      ? "Email"
+                      : "Address"}
+                  </h3>
+                  <p className="mt-1 text-sm text-white/60 break-words">
+                    {contactModal === "phone"
+                      ? BUSINESS_PHONE_PRETTY
+                      : contactModal === "email"
+                      ? BUSINESS_EMAIL
+                      : BUSINESS_ADDRESS}
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  className="rounded-xl border border-white/10 bg-white/10 px-3 py-2 text-sm font-semibold hover:bg-white/15"
+                  onClick={() => setContactModal(null)}
+                >
+                  Close
+                </button>
+              </div>
+
+              <div className="mt-5 grid grid-cols-1 gap-2">
+                {contactModal === "phone" ? (
+                  <>
+                    <a
+                      href={`tel:${BUSINESS_PHONE_E164}`}
+                      className="w-full rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-center text-sm font-extrabold hover:bg-white/15"
+                    >
+                      Call Now
+                    </a>
+                    <a
+                      href={`sms:${BUSINESS_PHONE_E164}`}
+                      className="w-full rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-center text-sm font-extrabold hover:bg-white/15"
+                    >
+                      Text
+                    </a>
+                    <button
+                      type="button"
+                      onClick={() => doCopy(BUSINESS_PHONE_PRETTY, "Phone")}
+                      className="w-full rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-sm font-extrabold hover:bg-white/15"
+                    >
+                      Copy Number
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        doShare({
+                          title: BUSINESS_NAME,
+                          text: BUSINESS_PHONE_PRETTY,
+                        }).then((ok) =>
+                          !ok ? doCopy(BUSINESS_PHONE_PRETTY, "Phone") : null
+                        )
+                      }
+                      className="w-full rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-sm font-extrabold hover:bg-white/15"
+                    >
+                      Share
+                    </button>
+                  </>
+                ) : null}
+
+                {contactModal === "email" ? (
+                  <>
+                    <a
+                      href={`mailto:${BUSINESS_EMAIL}`}
+                      className="w-full rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-center text-sm font-extrabold hover:bg-white/15"
+                    >
+                      Email Now
+                    </a>
+                    <button
+                      type="button"
+                      onClick={() => doCopy(BUSINESS_EMAIL, "Email")}
+                      className="w-full rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-sm font-extrabold hover:bg-white/15"
+                    >
+                      Copy Email
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        doShare({
+                          title: BUSINESS_NAME,
+                          text: BUSINESS_EMAIL,
+                        }).then((ok) =>
+                          !ok ? doCopy(BUSINESS_EMAIL, "Email") : null
+                        )
+                      }
+                      className="w-full rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-sm font-extrabold hover:bg-white/15"
+                    >
+                      Share
+                    </button>
+                  </>
+                ) : null}
+
+                {contactModal === "address" ? (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => doCopy(BUSINESS_ADDRESS, "Address")}
+                      className="w-full rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-sm font-extrabold hover:bg-white/15"
+                    >
+                      Copy Address
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => doCopy(googleMapsLink, "Maps link")}
+                      className="w-full rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-sm font-extrabold hover:bg-white/15"
+                    >
+                      Copy Maps Link
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        doShare({
+                          title: BUSINESS_NAME,
+                          text: BUSINESS_ADDRESS,
+                          url: googleMapsLink,
+                        }).then((ok) =>
+                          !ok ? doCopy(googleMapsLink, "Maps link") : null
+                        )
+                      }
+                      className="w-full rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-sm font-extrabold hover:bg-white/15"
+                    >
+                      Share
+                    </button>
+                  </>
+                ) : null}
+              </div>
+            </div>
+          </div>
+        ) : null}
+
+        {/* TOAST */}
+        {toast ? (
+          <div className="fixed bottom-5 left-1/2 z-[80] -translate-x-1/2 rounded-full border border-white/10 bg-black/80 px-4 py-2 text-sm text-white shadow-lg">
+            {toast}
+          </div>
+        ) : null}
+
+        {/* VIN HELP MODAL */}
+        {showVinHelp ? (
+          <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
+            <div
+              className="absolute inset-0 bg-black/70"
+              onClick={() => setShowVinHelp(false)}
+            />
+            <div className="relative w-full max-w-2xl rounded-3xl border border-white/10 bg-[#07110b] p-6 shadow-2xl">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <h3 className="text-xl font-extrabold">Where to find the VIN</h3>
+                  <p className="mt-1 text-sm text-white/60">
+                    Most vehicles have the VIN in at least two places.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  className="rounded-xl border border-white/10 bg-white/10 px-3 py-2 text-sm font-semibold hover:bg-white/15"
+                  onClick={() => setShowVinHelp(false)}
+                >
+                  Close
+                </button>
+              </div>
+
+              <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div className="rounded-2xl border border-white/10 bg-black/25 p-4">
+                  <div className="font-semibold">Windshield (driver side)</div>
+                  <div className="mt-2 text-sm text-white/70">
+                    Look through the windshield at the dashboard corner on the driver side.
                   </div>
                 </div>
-              </form>
-            )}
-          </div>
 
-          {/* Reviews Footer */}
-          <footer className="mt-6 rounded-3xl border border-[#15402F] bg-[#06110C] p-6 text-center shadow-[0_20px_80px_rgba(0,0,0,0.35)]">
-            <div className="text-sm font-semibold text-white/90">Reviews</div>
-            <p className="mx-auto mt-2 max-w-2xl text-xs text-white/65">
-              Real customer feedback. If we helped you, drop a review — quick, honest, and appreciated.
-            </p>
+                <div className="rounded-2xl border border-white/10 bg-black/25 p-4">
+                  <div className="font-semibold">Driver door jamb sticker</div>
+                  <div className="mt-2 text-sm text-white/70">
+                    Open the driver door and check the sticker on the pillar or door edge.
+                  </div>
+                </div>
 
-            <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
-              <a
-                href={GOOGLE_REVIEWS_URL}
-                target="_blank"
-                rel="noreferrer"
-                className="rounded-2xl bg-[#34D399] px-5 py-3 text-sm font-semibold text-[#06110C] hover:brightness-95"
-              >
-                Google Reviews
-              </a>
+                <div className="rounded-2xl border border-white/10 bg-black/25 p-4">
+                  <div className="font-semibold">Documents</div>
+                  <div className="mt-2 text-sm text-white/70">
+                    Registration, insurance card, or title often lists the VIN.
+                  </div>
+                </div>
 
-              <a
-                href={GOOGLE_WRITE_REVIEW_URL}
-                target="_blank"
-                rel="noreferrer"
-                className="rounded-2xl border border-[#1E4F3B] bg-[#040706] px-5 py-3 text-sm font-semibold text-white/90 hover:bg-[#0A1B13]"
-              >
-                Leave a Review
-              </a>
-
-              {hasYelp && (
-                <a
-                  href={YELP_URL}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="rounded-2xl border border-[#1E4F3B] bg-[#040706] px-5 py-3 text-sm font-semibold text-white/90 hover:bg-[#0A1B13]"
-                >
-                  Yelp
-                </a>
-              )}
-
-              {hasFacebook && (
-                <a
-                  href={FACEBOOK_URL}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="rounded-2xl border border-[#1E4F3B] bg-[#040706] px-5 py-3 text-sm font-semibold text-white/90 hover:bg-[#0A1B13]"
-                >
-                  Facebook
-                </a>
-              )}
+                <div className="rounded-2xl border border-white/10 bg-black/25 p-4">
+                  <div className="font-semibold">Engine bay / frame</div>
+                  <div className="mt-2 text-sm text-white/70">
+                    Some vehicles have VIN stamps under the hood or near strut towers.
+                  </div>
+                </div>
+              </div>
             </div>
-
-            <div className="mt-6 text-center text-[11px] text-white/40">
-              © {new Date().getFullYear()} Python Auto Repair
-            </div>
-          </footer>
-
-          {/* tiny legal */}
-          <div className="mt-4 text-center text-[10px] text-white/35">
-            “Python-fast” refers to response speed and workflow efficiency. Final pricing requires inspection.
           </div>
-        </section>
+        ) : null}
+
+        {/* VIN SCANNER MODAL */}
+        {showVinScanner ? (
+          <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
+            <div
+              className="absolute inset-0 bg-black/70"
+              onClick={() => (vinBusy ? null : setShowVinScanner(false))}
+            />
+            <div className="relative w-full max-w-lg rounded-3xl border border-white/10 bg-[#07110b] p-5 shadow-2xl">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <h3 className="text-xl font-extrabold">VIN Scanner</h3>
+                  <p className="mt-1 text-sm text-white/60">
+                    Take a clear photo of the VIN.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  className="rounded-xl border border-white/10 bg-white/10 px-3 py-2 text-sm font-semibold hover:bg-white/15 disabled:opacity-60"
+                  disabled={vinBusy}
+                  onClick={() => setShowVinScanner(false)}
+                >
+                  Close
+                </button>
+              </div>
+
+              <div className="mt-4 rounded-2xl border border-white/10 bg-black/25 p-4">
+                <input
+                  ref={cameraVinRef}
+                  type="file"
+                  accept="image/*"
+                  capture="environment"
+                  className="hidden"
+                  onChange={(e) => {
+                    const f = e.target.files?.[0];
+                    if (f) handleVinFromImage(f);
+                    e.currentTarget.value = "";
+                  }}
+                  disabled={vinBusy}
+                />
+
+                <button
+                  type="button"
+                  onClick={() => cameraVinRef.current?.click()}
+                  className={`inline-flex w-full items-center justify-center rounded-2xl px-4 py-4 font-extrabold border border-white/10 ${
+                    vinBusy
+                      ? "bg-white/5 text-white/40 cursor-not-allowed"
+                      : "bg-white/10 hover:bg-white/15"
+                  }`}
+                  disabled={vinBusy}
+                >
+                  {vinBusy ? "Reading..." : "Take VIN Photo"}
+                </button>
+
+                {vinError ? (
+                  <div className="mt-3 rounded-xl border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-200">
+                    {vinError}
+                  </div>
+                ) : null}
+              </div>
+            </div>
+          </div>
+        ) : null}
       </div>
     </main>
-  );
-}
-
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <label className="block text-left">
-      <div className="mb-2 text-xs font-semibold text-white/75">{label}</div>
-      {children}
-    </label>
-  );
-}
-
-function PythonHeadIcon({ className }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" className={className} fill="none" aria-hidden="true">
-      <path
-        d="M20.4 10.6c0 5.2-4.2 9.4-9.4 9.4-4.9 0-8.9-3.7-9.3-8.5-.1-1.3.9-2.5 2.2-2.6 1.1-.1 2.1.6 2.4 1.7.6 2.4 2.8 4.2 5.4 4.2 3.1 0 5.7-2.6 5.7-5.7 0-1.8-.8-3.4-2.2-4.5-1.2-.9-1.3-2.6-.2-3.6 1-1 2.5-1 3.6-.1 2.1 1.6 3.4 4.1 3.4 6.7Z"
-        stroke="currentColor"
-        strokeWidth="1.6"
-        strokeLinejoin="round"
-      />
-      <path d="M10.7 7.8c1.2-1.7 3.4-2.9 6.1-2.9" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
-      <circle cx="14.8" cy="7.2" r="0.9" fill="currentColor" />
-      <path d="M7.3 11.1c-.6 0-1.1.3-1.5.7" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
-    </svg>
-  );
-}
-
-function SerpentCanopy() {
-  // Rich “lush” color vibe (forest + exotic accents) without using the word “jungle”
-  return (
-    <div className="pointer-events-none absolute inset-0 -z-10 opacity-90">
-      {/* canopy sweep */}
-      <svg className="absolute -top-10 -left-10 h-[380px] w-[380px]" viewBox="0 0 380 380" fill="none">
-        <path
-          d="M30 90c70-55 130-55 180 0s110 55 180 0"
-          stroke="rgba(52,211,153,0.18)"
-          strokeWidth="4"
-          strokeLinecap="round"
-        />
-        <path
-          d="M20 160c85-65 150-65 200 0s110 65 200 0"
-          stroke="rgba(16,185,129,0.12)"
-          strokeWidth="4"
-          strokeLinecap="round"
-        />
-        <path
-          d="M35 235c65-40 125-40 175 0s110 40 175 0"
-          stroke="rgba(167,243,208,0.10)"
-          strokeWidth="3"
-          strokeLinecap="round"
-        />
-        <path
-          d="M70 300c40-18 80-18 120 0s80 18 120 0"
-          stroke="rgba(34,197,94,0.10)"
-          strokeWidth="2.5"
-          strokeLinecap="round"
-        />
-      </svg>
-
-      {/* corner “leaf” silhouettes */}
-      <svg className="absolute -bottom-28 -right-28 h-[560px] w-[560px] opacity-75" viewBox="0 0 560 560" fill="none">
-        <path
-          d="M125 380c78-135 170-190 275-165 82 20 129 90 112 165-24 107-166 178-299 144-75-19-111-71-88-144Z"
-          fill="rgba(6,17,12,0.70)"
-          stroke="rgba(30,79,59,0.22)"
-          strokeWidth="2"
-        />
-        <path d="M170 405c78-92 158-126 250-102" stroke="rgba(52,211,153,0.14)" strokeWidth="4" strokeLinecap="round" />
-        <path d="M215 452c66-70 132-95 204-74" stroke="rgba(34,197,94,0.12)" strokeWidth="4" strokeLinecap="round" />
-        {/* exotic accent stroke */}
-        <path d="M120 510c90-40 170-40 240 0" stroke="rgba(236,72,153,0.10)" strokeWidth="3" strokeLinecap="round" />
-      </svg>
-
-      <div className="absolute top-0 left-0 right-0 h-40 bg-gradient-to-b from-[#020403] to-transparent opacity-80" />
-    </div>
-  );
-}
-
-function ContactSheet(props: {
-  mode: ContactMode;
-  onClose: () => void;
-  phoneDisplay: string;
-  phoneTel: string;
-  email: string;
-  address: string;
-  mapsUrl: string;
-  onCopy: (text: string, label?: string) => Promise<void>;
-  onShareAddress: () => Promise<void>;
-}) {
-  const { mode, onClose, phoneDisplay, phoneTel, email, address, mapsUrl, onCopy, onShareAddress } = props;
-
-  const open = !!mode;
-  const title = mode === "call" ? "Call" : mode === "email" ? "Email" : mode === "directions" ? "Directions" : "";
-
-  // ESC closes + lock scroll while open
-  React.useEffect(() => {
-    if (!open) return;
-
-    const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-
-    const body = document.body;
-    const scrollY = window.scrollY || document.documentElement.scrollTop || 0;
-    const prevOverflow = body.style.overflow;
-    const prevPosition = body.style.position;
-    const prevTop = body.style.top;
-    const prevWidth = body.style.width;
-
-    body.style.overflow = "hidden";
-    body.style.position = "fixed";
-    body.style.top = `-${scrollY}px`;
-    body.style.width = "100%";
-
-    window.addEventListener("keydown", onKeyDown);
-
-    return () => {
-      window.removeEventListener("keydown", onKeyDown);
-      body.style.overflow = prevOverflow;
-      body.style.position = prevPosition;
-      body.style.top = prevTop;
-      body.style.width = prevWidth;
-      window.scrollTo(0, scrollY);
-    };
-  }, [open, onClose]);
-
-  if (!open) return null;
-
-  return (
-    <div className="fixed inset-0 z-50" aria-hidden={!open}>
-      <button
-        type="button"
-        aria-label="Close sheet"
-        onClick={onClose}
-        className="absolute inset-0 cursor-default bg-black/70 backdrop-blur-sm"
-      />
-
-      <div className="absolute bottom-0 left-0 right-0 mx-auto w-full max-w-xl">
-        <div
-          className="rounded-t-3xl border border-[#15402F] bg-[#06110C] px-5 pb-6 pt-3 shadow-2xl animate-sheetIn"
-          onMouseDown={(e) => e.stopPropagation()}
-        >
-          <div className="mx-auto mb-3 h-1.5 w-12 rounded-full bg-white/15" />
-          <div className="flex items-center justify-between">
-            <div className="text-base font-semibold text-white/90">{title}</div>
-            <button
-              type="button"
-              onClick={onClose}
-              className="rounded-xl border border-[#1E4F3B] bg-[#040706] px-3 py-1.5 text-sm text-white/80 hover:bg-[#0A1B13]"
-            >
-              Close
-            </button>
-          </div>
-
-          <div className="mt-4 rounded-2xl border border-[#15402F] bg-[#040706] p-4">
-            {mode === "call" && (
-              <>
-                <div className="text-xs text-white/55">Phone</div>
-                <div className="mt-1 text-lg font-semibold text-white/90">{phoneDisplay}</div>
-
-                <div className="mt-4 flex flex-col gap-2 sm:flex-row">
-                  <a
-                    href={`tel:${phoneTel}`}
-                    className="inline-flex flex-1 items-center justify-center rounded-2xl bg-[#34D399] px-4 py-3 text-sm font-semibold text-[#06110C] hover:brightness-95"
-                  >
-                    Call now
-                  </a>
-                  <button
-                    type="button"
-                    onClick={() => onCopy(phoneDisplay, "Number copied")}
-                    className="inline-flex flex-1 items-center justify-center rounded-2xl border border-[#1E4F3B] bg-[#06110C] px-4 py-3 text-sm font-semibold text-white/90 hover:bg-[#0A1B13]"
-                  >
-                    Copy
-                  </button>
-                </div>
-              </>
-            )}
-
-            {mode === "email" && (
-              <>
-                <div className="text-xs text-white/55">Email</div>
-                <div className="mt-1 text-lg font-semibold text-white/90">{email}</div>
-
-                <div className="mt-4 flex flex-col gap-2 sm:flex-row">
-                  <a
-                    href={`mailto:${email}`}
-                    className="inline-flex flex-1 items-center justify-center rounded-2xl bg-[#34D399] px-4 py-3 text-sm font-semibold text-[#06110C] hover:brightness-95"
-                  >
-                    Compose email
-                  </a>
-                  <button
-                    type="button"
-                    onClick={() => onCopy(email, "Email copied")}
-                    className="inline-flex flex-1 items-center justify-center rounded-2xl border border-[#1E4F3B] bg-[#06110C] px-4 py-3 text-sm font-semibold text-white/90 hover:bg-[#0A1B13]"
-                  >
-                    Copy
-                  </button>
-                </div>
-              </>
-            )}
-
-            {mode === "directions" && (
-              <>
-                <div className="text-xs text-white/55">Address</div>
-                <div className="mt-1 text-base font-semibold text-white/90">{address}</div>
-
-                <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2">
-                  <a
-                    href={mapsUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="inline-flex items-center justify-center rounded-2xl bg-[#34D399] px-4 py-3 text-sm font-semibold text-[#06110C] hover:brightness-95"
-                  >
-                    Open Maps
-                  </a>
-                  <button
-                    type="button"
-                    onClick={() => onCopy(mapsUrl, "Maps link copied")}
-                    className="inline-flex items-center justify-center rounded-2xl border border-[#1E4F3B] bg-[#06110C] px-4 py-3 text-sm font-semibold text-white/90 hover:bg-[#0A1B13]"
-                  >
-                    Copy Maps link
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => onCopy(address, "Address copied")}
-                    className="inline-flex items-center justify-center rounded-2xl border border-[#1E4F3B] bg-[#06110C] px-4 py-3 text-sm font-semibold text-white/90 hover:bg-[#0A1B13]"
-                  >
-                    Copy address
-                  </button>
-                  <button
-                    type="button"
-                    onClick={onShareAddress}
-                    className="inline-flex items-center justify-center rounded-2xl border border-[#1E4F3B] bg-[#06110C] px-4 py-3 text-sm font-semibold text-white/90 hover:bg-[#0A1B13]"
-                  >
-                    Share
-                  </button>
-                </div>
-
-                <div className="mt-3 text-xs text-white/50">
-                  “Share” uses your phone’s share sheet when available (Message/WhatsApp/Telegram).
-                </div>
-              </>
-            )}
-          </div>
-        </div>
-      </div>
-
-      <style jsx global>{`
-        @keyframes sheetIn {
-          0% {
-            transform: translateY(24px);
-            opacity: 0.9;
-          }
-          100% {
-            transform: translateY(0px);
-            opacity: 1;
-          }
-        }
-        .animate-sheetIn {
-          animation: sheetIn 260ms cubic-bezier(0.2, 0.9, 0.2, 1) both;
-        }
-      `}</style>
-    </div>
   );
 }
