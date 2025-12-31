@@ -71,7 +71,7 @@ export default function Page() {
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
-  // Contact modal
+  // Bottom sheet
   const [contactMode, setContactMode] = useState<ContactMode>(null);
   const [toast, setToast] = useState<string | null>(null);
 
@@ -144,7 +144,7 @@ export default function Page() {
       setToast(label);
       window.setTimeout(() => setToast(null), 1500);
     } catch {
-      // Fallback
+      // fallback
       const ta = document.createElement("textarea");
       ta.value = text;
       document.body.appendChild(ta);
@@ -167,7 +167,7 @@ export default function Page() {
         });
         return;
       } catch {
-        // user cancelled or share failed; fall back to copy
+        // user canceled; fall back to copy
       }
     }
     await copyToClipboard(shareText, "Address copied");
@@ -200,8 +200,8 @@ export default function Page() {
         </div>
       )}
 
-      {/* Contact modal */}
-      <ContactModal
+      {/* Contact bottom sheet */}
+      <ContactSheet
         mode={contactMode}
         onClose={() => setContactMode(null)}
         phoneDisplay={SHOP_PHONE_DISPLAY}
@@ -214,7 +214,7 @@ export default function Page() {
       />
 
       <div className="mx-auto flex w-full max-w-4xl flex-col items-center px-5">
-        {/* Header (clean: just the buttons, no repeated text line) */}
+        {/* Header */}
         <header className="w-full py-5">
           <div className="flex w-full flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-3">
@@ -558,7 +558,7 @@ function JunglePlants() {
   );
 }
 
-function ContactModal(props: {
+function ContactSheet(props: {
   mode: ContactMode;
   onClose: () => void;
   phoneDisplay: string;
@@ -571,118 +571,178 @@ function ContactModal(props: {
 }) {
   const { mode, onClose, phoneDisplay, phoneTel, email, address, mapsUrl, onCopy, onShareAddress } = props;
 
-  if (!mode) return null;
+  const open = !!mode;
+  const title = mode === "call" ? "Call" : mode === "email" ? "Email" : mode === "directions" ? "Directions" : "";
 
-  const title = mode === "call" ? "Call" : mode === "email" ? "Email" : "Directions";
+  // ESC closes + lock scroll while open
+  React.useEffect(() => {
+    if (!open) return;
+
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+
+    const body = document.body;
+    const scrollY = window.scrollY || document.documentElement.scrollTop || 0;
+    const prevOverflow = body.style.overflow;
+    const prevPosition = body.style.position;
+    const prevTop = body.style.top;
+    const prevWidth = body.style.width;
+
+    body.style.overflow = "hidden";
+    body.style.position = "fixed";
+    body.style.top = `-${scrollY}px`;
+    body.style.width = "100%";
+
+    window.addEventListener("keydown", onKeyDown);
+
+    return () => {
+      window.removeEventListener("keydown", onKeyDown);
+      body.style.overflow = prevOverflow;
+      body.style.position = prevPosition;
+      body.style.top = prevTop;
+      body.style.width = prevWidth;
+      window.scrollTo(0, scrollY);
+    };
+  }, [open, onClose]);
+
+  if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 grid place-items-center bg-black/60 px-4 backdrop-blur-sm" onMouseDown={onClose}>
-      <div
-        className="w-full max-w-md rounded-3xl border border-[#1D3B28] bg-[#07140C] p-5 shadow-2xl"
-        onMouseDown={(e) => e.stopPropagation()}
-      >
-        <div className="flex items-center justify-between">
-          <div className="text-base font-semibold text-white/90">{title}</div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded-xl border border-[#2E5A3E] bg-[#0B1B12] px-3 py-1.5 text-sm text-white/80 hover:bg-[#0E2418]"
-          >
-            Close
-          </button>
-        </div>
+    <div className="fixed inset-0 z-50" aria-hidden={!open}>
+      {/* Backdrop */}
+      <button
+        type="button"
+        aria-label="Close sheet"
+        onClick={onClose}
+        className="absolute inset-0 cursor-default bg-black/60 backdrop-blur-sm"
+      />
 
-        <div className="mt-4 rounded-2xl border border-[#1D3B28] bg-[#050A07] p-4">
-          {mode === "call" && (
-            <>
-              <div className="text-xs text-white/55">Phone</div>
-              <div className="mt-1 text-lg font-semibold text-white/90">{phoneDisplay}</div>
+      <div className="absolute bottom-0 left-0 right-0 mx-auto w-full max-w-xl">
+        <div
+          className="rounded-t-3xl border border-[#1D3B28] bg-[#07140C] px-5 pb-6 pt-3 shadow-2xl animate-sheetIn"
+          onMouseDown={(e) => e.stopPropagation()}
+        >
+          <div className="mx-auto mb-3 h-1.5 w-12 rounded-full bg-white/20" />
+          <div className="flex items-center justify-between">
+            <div className="text-base font-semibold text-white/90">{title}</div>
+            <button
+              type="button"
+              onClick={onClose}
+              className="rounded-xl border border-[#2E5A3E] bg-[#0B1B12] px-3 py-1.5 text-sm text-white/80 hover:bg-[#0E2418]"
+            >
+              Close
+            </button>
+          </div>
 
-              <div className="mt-4 flex flex-col gap-2 sm:flex-row">
-                <a
-                  href={`tel:${phoneTel}`}
-                  className="inline-flex flex-1 items-center justify-center rounded-2xl bg-[#E8D48A] px-4 py-3 text-sm font-semibold text-[#0B0F0C] hover:brightness-95"
-                >
-                  Call now
-                </a>
-                <button
-                  type="button"
-                  onClick={() => onCopy(phoneDisplay, "Number copied")}
-                  className="inline-flex flex-1 items-center justify-center rounded-2xl border border-[#2E5A3E] bg-[#0B1B12] px-4 py-3 text-sm font-semibold text-white/90 hover:bg-[#0E2418]"
-                >
-                  Copy
-                </button>
-              </div>
-            </>
-          )}
+          <div className="mt-4 rounded-2xl border border-[#1D3B28] bg-[#050A07] p-4">
+            {mode === "call" && (
+              <>
+                <div className="text-xs text-white/55">Phone</div>
+                <div className="mt-1 text-lg font-semibold text-white/90">{phoneDisplay}</div>
 
-          {mode === "email" && (
-            <>
-              <div className="text-xs text-white/55">Email</div>
-              <div className="mt-1 text-lg font-semibold text-white/90">{email}</div>
+                <div className="mt-4 flex flex-col gap-2 sm:flex-row">
+                  <a
+                    href={`tel:${phoneTel}`}
+                    className="inline-flex flex-1 items-center justify-center rounded-2xl bg-[#E8D48A] px-4 py-3 text-sm font-semibold text-[#0B0F0C] hover:brightness-95"
+                  >
+                    Call now
+                  </a>
+                  <button
+                    type="button"
+                    onClick={() => onCopy(phoneDisplay, "Number copied")}
+                    className="inline-flex flex-1 items-center justify-center rounded-2xl border border-[#2E5A3E] bg-[#0B1B12] px-4 py-3 text-sm font-semibold text-white/90 hover:bg-[#0E2418]"
+                  >
+                    Copy
+                  </button>
+                </div>
+              </>
+            )}
 
-              <div className="mt-4 flex flex-col gap-2 sm:flex-row">
-                <a
-                  href={`mailto:${email}`}
-                  className="inline-flex flex-1 items-center justify-center rounded-2xl bg-[#E8D48A] px-4 py-3 text-sm font-semibold text-[#0B0F0C] hover:brightness-95"
-                >
-                  Compose email
-                </a>
-                <button
-                  type="button"
-                  onClick={() => onCopy(email, "Email copied")}
-                  className="inline-flex flex-1 items-center justify-center rounded-2xl border border-[#2E5A3E] bg-[#0B1B12] px-4 py-3 text-sm font-semibold text-white/90 hover:bg-[#0E2418]"
-                >
-                  Copy
-                </button>
-              </div>
-            </>
-          )}
+            {mode === "email" && (
+              <>
+                <div className="text-xs text-white/55">Email</div>
+                <div className="mt-1 text-lg font-semibold text-white/90">{email}</div>
 
-          {mode === "directions" && (
-            <>
-              <div className="text-xs text-white/55">Address</div>
-              <div className="mt-1 text-base font-semibold text-white/90">{address}</div>
+                <div className="mt-4 flex flex-col gap-2 sm:flex-row">
+                  <a
+                    href={`mailto:${email}`}
+                    className="inline-flex flex-1 items-center justify-center rounded-2xl bg-[#E8D48A] px-4 py-3 text-sm font-semibold text-[#0B0F0C] hover:brightness-95"
+                  >
+                    Compose email
+                  </a>
+                  <button
+                    type="button"
+                    onClick={() => onCopy(email, "Email copied")}
+                    className="inline-flex flex-1 items-center justify-center rounded-2xl border border-[#2E5A3E] bg-[#0B1B12] px-4 py-3 text-sm font-semibold text-white/90 hover:bg-[#0E2418]"
+                  >
+                    Copy
+                  </button>
+                </div>
+              </>
+            )}
 
-              <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2">
-                <a
-                  href={mapsUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="inline-flex items-center justify-center rounded-2xl bg-[#E8D48A] px-4 py-3 text-sm font-semibold text-[#0B0F0C] hover:brightness-95"
-                >
-                  Open Maps
-                </a>
-                <button
-                  type="button"
-                  onClick={() => onCopy(mapsUrl, "Maps link copied")}
-                  className="inline-flex items-center justify-center rounded-2xl border border-[#2E5A3E] bg-[#0B1B12] px-4 py-3 text-sm font-semibold text-white/90 hover:bg-[#0E2418]"
-                >
-                  Copy Maps link
-                </button>
-                <button
-                  type="button"
-                  onClick={() => onCopy(address, "Address copied")}
-                  className="inline-flex items-center justify-center rounded-2xl border border-[#2E5A3E] bg-[#0B1B12] px-4 py-3 text-sm font-semibold text-white/90 hover:bg-[#0E2418]"
-                >
-                  Copy address
-                </button>
-                <button
-                  type="button"
-                  onClick={onShareAddress}
-                  className="inline-flex items-center justify-center rounded-2xl border border-[#2E5A3E] bg-[#0B1B12] px-4 py-3 text-sm font-semibold text-white/90 hover:bg-[#0E2418]"
-                >
-                  Share
-                </button>
-              </div>
+            {mode === "directions" && (
+              <>
+                <div className="text-xs text-white/55">Address</div>
+                <div className="mt-1 text-base font-semibold text-white/90">{address}</div>
 
-              <div className="mt-3 text-xs text-white/50">
-                “Share” uses your phone’s share sheet when available (Message/WhatsApp/Telegram).
-              </div>
-            </>
-          )}
+                <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2">
+                  <a
+                    href={mapsUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center justify-center rounded-2xl bg-[#E8D48A] px-4 py-3 text-sm font-semibold text-[#0B0F0C] hover:brightness-95"
+                  >
+                    Open Maps
+                  </a>
+                  <button
+                    type="button"
+                    onClick={() => onCopy(mapsUrl, "Maps link copied")}
+                    className="inline-flex items-center justify-center rounded-2xl border border-[#2E5A3E] bg-[#0B1B12] px-4 py-3 text-sm font-semibold text-white/90 hover:bg-[#0E2418]"
+                  >
+                    Copy Maps link
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => onCopy(address, "Address copied")}
+                    className="inline-flex items-center justify-center rounded-2xl border border-[#2E5A3E] bg-[#0B1B12] px-4 py-3 text-sm font-semibold text-white/90 hover:bg-[#0E2418]"
+                  >
+                    Copy address
+                  </button>
+                  <button
+                    type="button"
+                    onClick={onShareAddress}
+                    className="inline-flex items-center justify-center rounded-2xl border border-[#2E5A3E] bg-[#0B1B12] px-4 py-3 text-sm font-semibold text-white/90 hover:bg-[#0E2418]"
+                  >
+                    Share
+                  </button>
+                </div>
+
+                <div className="mt-3 text-xs text-white/50">
+                  “Share” uses your phone’s share sheet when available (Message/WhatsApp/Telegram).
+                </div>
+              </>
+            )}
+          </div>
         </div>
       </div>
+
+      <style jsx global>{`
+        @keyframes sheetIn {
+          0% {
+            transform: translateY(24px);
+            opacity: 0.9;
+          }
+          100% {
+            transform: translateY(0px);
+            opacity: 1;
+          }
+        }
+        .animate-sheetIn {
+          animation: sheetIn 260ms cubic-bezier(0.2, 0.9, 0.2, 1) both;
+        }
+      `}</style>
     </div>
   );
 }
