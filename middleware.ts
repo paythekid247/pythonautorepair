@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 const USER = "admin";
-const PASS = "PythonAuto1"; // change this
+const PASS = "PythonAuto1"; 
 
 export function middleware(req: NextRequest) {
   const authHeader = req.headers.get("authorization");
