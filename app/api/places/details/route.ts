@@ -1,73 +1,71 @@
-export const runtime = "nodejs";
+import { NextResponse } from "next/server";
 
-export async function GET() {
+export const runtime = "nodejs"; // ensure server runtime
+export const dynamic = "force-dynamic";
+
+function jsonError(message: string, status = 400, extra?: any) {
+  return NextResponse.json(
+    { ok: false, error: message, ...(extra ? { extra } : {}) },
+    { status }
+  );
+}
+
+export async function GET(req: Request) {
+  const { searchParams } = new URL(req.url);
+  const placeId = searchParams.get("placeId");
+
+  if (!placeId) return jsonError("Missing placeId", 400);
+
+  const key = process.env.GOOGLE_MAPS_SERVER_KEY;
+  if (!key) return jsonError("Server misconfigured: GOOGLE_MAPS_SERVER_KEY missing", 500);
+
+  // Places API (New) Place Details
+  const url = `https://places.googleapis.com/v1/places/${encodeURIComponent(placeId)}?languageCode=en`;
+
+  // Use FieldMask to avoid paying for / retrieving unnecessary fields
+  const fieldMask = [
+    "id",
+    "displayName",
+    "formattedAddress",
+    "location",
+    "nationalPhoneNumber",
+    "websiteUri",
+    "rating",
+    "userRatingCount",
+    "googleMapsUri",
+    "regularOpeningHours",
+    "reviews",
+  ].join(",");
+
+  let resp: Response;
   try {
-    const apiKey = process.env.GOOGLE_MAPS_API_KEY;
-    const placeId = process.env.GOOGLE_PLACE_ID;
-
-    if (!apiKey) {
-      return Response.json({ ok: false, error: "Missing GOOGLE_MAPS_API_KEY." }, { status: 500 });
-    }
-    if (!placeId) {
-      return Response.json({ ok: false, error: "Missing GOOGLE_PLACE_ID." }, { status: 500 });
-    }
-
-    const url = `https://places.googleapis.com/v1/places/${placeId}`;
-
-    const r = await fetch(url, {
+    resp = await fetch(url, {
       method: "GET",
       headers: {
-        "X-Goog-Api-Key": apiKey,
-        "X-Goog-FieldMask":
-          "displayName,rating,userRatingCount,reviews,formattedAddress,nationalPhoneNumber,websiteUri",
+        "X-Goog-Api-Key": key,
+        "X-Goog-FieldMask": fieldMask,
       },
       cache: "no-store",
     });
-
-    const raw = await r.text();
-
-    // Return Google's raw error to you (huge time-saver)
-    if (!r.ok) {
-      return Response.json(
-        {
-          ok: false,
-          upstreamStatus: r.status,
-          upstreamStatusText: r.statusText,
-          googleRaw: raw.slice(0, 2000),
-          hint:
-            "Common causes: key restricted to HTTP referrers, Places API not enabled, billing not enabled, wrong API restriction.",
-        },
-        { status: 200 } // keep it 200 so curl shows JSON cleanly
-      );
-    }
-
-    const data = JSON.parse(raw);
-
-    const reviews = Array.isArray(data?.reviews)
-      ? data.reviews.slice(0, 8).map((rv: any) => ({
-          name: rv?.authorAttribution?.displayName || "Customer",
-          rating: rv?.rating ?? null,
-          text: rv?.text?.text || "",
-          time: rv?.relativePublishTimeDescription || "",
-        }))
-      : [];
-
-    return Response.json({
-      ok: true,
-      place: {
-        name: data?.displayName?.text || "Python Auto Repair",
-        rating: data?.rating ?? null,
-        userRatingCount: data?.userRatingCount ?? null,
-        formattedAddress: data?.formattedAddress || null,
-        phone: data?.nationalPhoneNumber || null,
-        website: data?.websiteUri || null,
-      },
-      reviews,
-    });
-  } catch (err: any) {
-    return Response.json(
-      { ok: false, error: err?.message || "Server error fetching place details." },
-      { status: 500 }
-    );
+  } catch (e: any) {
+    return jsonError("Network error calling Google Places", 502, { message: e?.message });
   }
+
+  const text = await resp.text();
+  let data: any = null;
+  try {
+    data = text ? JSON.parse(text) : null;
+  } catch {
+    // keep raw text if Google returns non-JSON (rare, but happens)
+  }
+
+  if (!resp.ok) {
+    return jsonError("Google Places error", resp.status, {
+      status: resp.status,
+      statusText: resp.statusText,
+      googleRaw: data ?? text,
+    });
+  }
+
+  return NextResponse.json({ ok: true, place: data }, { status: 200 });
 }
