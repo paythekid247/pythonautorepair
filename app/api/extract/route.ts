@@ -44,6 +44,7 @@ export async function POST(req: Request) {
             {
               type: "input_image",
               image_url: `data:${mimeType || "image/jpeg"};base64,${imageBase64}`,
+              detail: "low"
             },
           ],
         },
