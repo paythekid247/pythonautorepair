@@ -849,23 +849,38 @@ export default function Page() {
                   <select
                     value={lang}
                     onChange={(e) => setLang(e.target.value as Lang)}
-                    className="bg-transparent outline-none"
                     aria-label="Language"
+                    className="
+      cursor-pointer
+      bg-transparent
+      text-white
+      outline-none
+      pr-6
+      appearance-none
+    "
+                    style={{
+                      WebkitAppearance: "none",
+                      MozAppearance: "none",
+                      appearance: "none",
+                    }}
                   >
-                    <option value="en">EN</option>
-                    <option value="es">ES</option>
-                    <option value="ht">HT</option>
-                    <option value="ru">RU</option>
+                    <option value="en" style={{ backgroundColor: "#000", color: "#fff" }}>EN</option>
+                    <option value="es" style={{ backgroundColor: "#000", color: "#fff" }}>ES</option>
+                    <option value="ht" style={{ backgroundColor: "#000", color: "#fff" }}>HT</option>
+                    <option value="ru" style={{ backgroundColor: "#000", color: "#fff" }}>RU</option>
                   </select>
-                </div>
-              </div>
 
-              <p className="max-w-2xl text-white/90">{t("tagline")}</p>
+                  {/* tiny dropdown chevron so it *looks* like a dropdown */}
+                  <span className="pointer-events-none absolute ml-[-18px] mt-[2px] text-white/75">▾</span>
+                </div>
+
+
+                <p className="max-w-2xl text-white/90">{t("tagline")}</p>
             </header>
           </div>
 
-           {/* CARD */}
-         <div className="mt-6 rounded-3xl border border-yellow-300/20 bg-black/80 p-5 backdrop-blur-md shadow-[0_18px_40px_rgba(0,0,0,0.65)] sm:p-7">
+          {/* CARD */}
+          <div className="mt-6 rounded-3xl border border-yellow-300/20 bg-black/80 p-5 backdrop-blur-md shadow-[0_18px_40px_rgba(0,0,0,0.65)] sm:p-7">
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
               <div>
                 <label className="text-sm text-white/75">{t("name_optional")}</label>
@@ -1479,9 +1494,8 @@ export default function Page() {
                 <button
                   type="button"
                   onClick={() => cameraVinRef.current?.click()}
-                  className={`inline-flex w-full items-center justify-center rounded-2xl px-4 py-4 font-extrabold border border-yellow-300/30 shadow-[0_14px_28px_rgba(0,0,0,0.55)] ${
-                    vinBusy ? "bg-white/5 text-white/45 cursor-not-allowed" : "bg-emerald-950/40 hover:bg-emerald-950/50"
-                  }`}
+                  className={`inline-flex w-full items-center justify-center rounded-2xl px-4 py-4 font-extrabold border border-yellow-300/30 shadow-[0_14px_28px_rgba(0,0,0,0.55)] ${vinBusy ? "bg-white/5 text-white/45 cursor-not-allowed" : "bg-emerald-950/40 hover:bg-emerald-950/50"
+                    }`}
                   disabled={vinBusy}
                 >
                   {vinBusy ? t("reading") : t("take_vin_photo")}
