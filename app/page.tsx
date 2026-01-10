@@ -668,7 +668,6 @@ export default function Page() {
   const BUSINESS_ADDRESS = "1114 NE 4th Ave, Fort Lauderdale, FL 33304";
 
   const [lang, setLang] = useState<Lang>("en");
-  
   const t = (key: string) => I18N[lang]?.[key] ?? I18N.en[key] ?? key;
 
   const googleMapsLink = useMemo(
@@ -1004,7 +1003,7 @@ export default function Page() {
                   </button>
 
                   {langOpen ? (
-                    <div className="absolute right-0 z-[80] mt-2 w-16 overflow-hidden rounded-2xl border border-yellow-300/25 bg-black shadow-[0_18px_40px_rgba(0,0,0,0.65)]">
+                    <div className="absolute right-0 z-[9999] mt-2 w-16 overflow-hidden rounded-2xl border border-yellow-300/25 bg-black shadow-[0_18px_40px_rgba(0,0,0,0.65)]">
                       {(["en", "es", "ht", "ru"] as Lang[]).map((l) => (
                         <button
                           key={l}
@@ -1015,8 +1014,8 @@ export default function Page() {
                           }}
                           className={[
                             "w-full px-3 py-2 text-left text-xs font-extrabold text-white/90",
-                            "hover:bg-emerald-900/60",
-                            lang === l ? "bg-emerald-950/60" : "bg-black",
+                            "hover:bg-black/80",
+                            lang === l ? "bg-black/90" : "bg-black",
                           ].join(" ")}
                         >
                           {l.toUpperCase()}
@@ -1025,11 +1024,6 @@ export default function Page() {
                     </div>
                   ) : null}
                 </div>
-
-                {/* tiny dropdown chevron so it *looks* like a dropdown */}
-                <span className="pointer-events-none absolute ml-[-18px] mt-[2px] text-white/75">
-                  ▾
-                </span>
               </div>
 
               <p className="max-w-2xl text-white/90">{t("tagline")}</p>
