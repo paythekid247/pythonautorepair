@@ -968,6 +968,46 @@ export default function Page() {
 
   return (
     <main className="min-h-screen bg-[#040907] text-white">
+      <div className="relative ml-2">
+        {/* Language (top-right, button + menu anchored together) */}
+<div className="absolute top-4 right-4 z-[9999]">
+  <div className="relative">
+    <button
+      type="button"
+      onClick={() => setLangOpen((v) => !v)}
+      className="flex items-center gap-2 rounded-2xl border border-yellow-300/25 bg-black/70 px-3 py-2 text-xs font-extrabold text-white/90 backdrop-blur"
+      aria-label="Language"
+    >
+      {lang.toUpperCase()}
+      <span className="text-white/70">▾</span>
+    </button>
+
+    {langOpen ? (
+      <div className="absolute right-0 mt-2 w-16 overflow-hidden rounded-2xl border border-yellow-300/25 bg-black shadow-[0_18px_40px_rgba(0,0,0,0.65)]">
+        {(["en", "es", "ht", "ru"] as Lang[]).map((l) => (
+          <button
+            key={l}
+            type="button"
+            onClick={() => {
+              setLang(l);
+              setLangOpen(false);
+            }}
+            className={[
+              "w-full px-3 py-2 text-left text-xs font-extrabold text-white/90",
+              "hover:bg-black/80",
+              lang === l ? "bg-black/90" : "bg-black",
+            ].join(" ")}
+          >
+            {l.toUpperCase()}
+          </button>
+        ))}
+      </div>
+    ) : null}
+  </div>
+</div>
+
+      </div>
+
       <div className="relative pb-28">
         <div className="absolute inset-0">
           <img
@@ -990,40 +1030,6 @@ export default function Page() {
                 <h1 className="text-3xl font-extrabold tracking-tight sm:text-5xl">
                   {BUSINESS_NAME}
                 </h1>
-
-                <div className="relative ml-2">
-                  <button
-                    type="button"
-                    onClick={() => setLangOpen((v) => !v)}
-                    className="flex items-center gap-2 rounded-2xl border border-yellow-300/25 bg-black/70 px-3 py-2 text-xs font-extrabold text-white/90 backdrop-blur"
-                    aria-label="Language"
-                  >
-                    {lang.toUpperCase()}
-                    <span className="text-white/70">▾</span>
-                  </button>
-
-                  {langOpen ? (
-                    <div className="absolute right-0 z-[9999] mt-2 w-16 overflow-hidden rounded-2xl border border-yellow-300/25 bg-black shadow-[0_18px_40px_rgba(0,0,0,0.65)]">
-                      {(["en", "es", "ht", "ru"] as Lang[]).map((l) => (
-                        <button
-                          key={l}
-                          type="button"
-                          onClick={() => {
-                            setLang(l);
-                            setLangOpen(false);
-                          }}
-                          className={[
-                            "w-full px-3 py-2 text-left text-xs font-extrabold text-white/90",
-                            "hover:bg-black/80",
-                            lang === l ? "bg-black/90" : "bg-black",
-                          ].join(" ")}
-                        >
-                          {l.toUpperCase()}
-                        </button>
-                      ))}
-                    </div>
-                  ) : null}
-                </div>
               </div>
 
               <p className="max-w-2xl text-white/90">{t("tagline")}</p>
