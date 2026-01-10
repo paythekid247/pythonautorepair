@@ -35,23 +35,101 @@ const POPULAR_MAKES: PopularMake[] = [
   "Other",
 ];
 
-const POPULAR_MODELS_BY_MAKE: Record<Exclude<PopularMake, "Other">, string[]> = {
-  Toyota: ["Camry", "Corolla", "RAV4", "Highlander", "Tacoma", "Tundra", "4Runner", "Prius", "Sienna", "Avalon"],
-  Honda: ["Civic", "Accord", "CR-V", "HR-V", "Pilot", "Odyssey", "Ridgeline", "Fit", "Passport"],
-  Ford: ["F-150", "Escape", "Explorer", "Edge", "Bronco", "Ranger", "Mustang", "Expedition", "Fusion"],
-  Chevrolet: ["Silverado 1500", "Equinox", "Tahoe", "Suburban", "Traverse", "Malibu", "Colorado", "Camaro", "Blazer"],
-  Nissan: ["Altima", "Sentra", "Rogue", "Pathfinder", "Murano", "Frontier", "Maxima", "Versa"],
-  Hyundai: ["Elantra", "Sonata", "Tucson", "Santa Fe", "Kona", "Palisade", "Accent"],
+const POPULAR_MODELS_BY_MAKE: Record<
+  Exclude<PopularMake, "Other">,
+  string[]
+> = {
+  Toyota: [
+    "Camry",
+    "Corolla",
+    "RAV4",
+    "Highlander",
+    "Tacoma",
+    "Tundra",
+    "4Runner",
+    "Prius",
+    "Sienna",
+    "Avalon",
+  ],
+  Honda: [
+    "Civic",
+    "Accord",
+    "CR-V",
+    "HR-V",
+    "Pilot",
+    "Odyssey",
+    "Ridgeline",
+    "Fit",
+    "Passport",
+  ],
+  Ford: [
+    "F-150",
+    "Escape",
+    "Explorer",
+    "Edge",
+    "Bronco",
+    "Ranger",
+    "Mustang",
+    "Expedition",
+    "Fusion",
+  ],
+  Chevrolet: [
+    "Silverado 1500",
+    "Equinox",
+    "Tahoe",
+    "Suburban",
+    "Traverse",
+    "Malibu",
+    "Colorado",
+    "Camaro",
+    "Blazer",
+  ],
+  Nissan: [
+    "Altima",
+    "Sentra",
+    "Rogue",
+    "Pathfinder",
+    "Murano",
+    "Frontier",
+    "Maxima",
+    "Versa",
+  ],
+  Hyundai: [
+    "Elantra",
+    "Sonata",
+    "Tucson",
+    "Santa Fe",
+    "Kona",
+    "Palisade",
+    "Accent",
+  ],
   Kia: ["Forte", "K5", "Sportage", "Sorento", "Telluride", "Soul", "Rio"],
-  Jeep: ["Wrangler", "Grand Cherokee", "Cherokee", "Compass", "Renegade", "Gladiator"],
-  Subaru: ["Outback", "Forester", "Crosstrek", "Impreza", "Legacy", "Ascent", "WRX"],
+  Jeep: [
+    "Wrangler",
+    "Grand Cherokee",
+    "Cherokee",
+    "Compass",
+    "Renegade",
+    "Gladiator",
+  ],
+  Subaru: [
+    "Outback",
+    "Forester",
+    "Crosstrek",
+    "Impreza",
+    "Legacy",
+    "Ascent",
+    "WRX",
+  ],
   Volkswagen: ["Jetta", "Passat", "Tiguan", "Atlas", "Golf", "Taos"],
   BMW: ["3 Series", "5 Series", "X3", "X5", "X1", "4 Series", "7 Series"],
   "Mercedes-Benz": ["C-Class", "E-Class", "GLC", "GLE", "A-Class", "S-Class"],
   Tesla: ["Model 3", "Model Y", "Model S", "Model X", "Cybertruck"],
 };
 
-const YEARS: string[] = Array.from({ length: 28 }, (_, i) => String(new Date().getFullYear() - i));
+const YEARS: string[] = Array.from({ length: 28 }, (_, i) =>
+  String(new Date().getFullYear() - i)
+);
 
 type Lang = "en" | "es" | "ht" | "ru";
 
@@ -99,14 +177,16 @@ const I18N: Record<Lang, Record<string, string>> = {
     damage_details: "Damage Details",
     optional: "(optional)",
     add_notes_help: "If you want, add notes that help us estimate faster.",
-    damage_placeholder: "Example: Front bumper cracked, hood bent, passenger headlight broken...",
+    damage_placeholder:
+      "Example: Front bumper cracked, hood bent, passenger headlight broken...",
     complete_vin_step: "Complete VIN Step",
     proceed_to_photos: "Proceed to Photos",
     python_fast_estimates: "Python Fast Estimates",
     sending: "Sending...",
     complete_vin_first: "Complete the VIN step first",
     add_damage_photos: "Add damage photos to continue",
-    estimate_preliminary: "Estimates are preliminary and may change after inspection.",
+    estimate_preliminary:
+      "Estimates are preliminary and may change after inspection.",
     call: "Call",
     email: "Email",
     get_directions: "Get Directions",
@@ -123,20 +203,25 @@ const I18N: Record<Lang, Record<string, string>> = {
     vin_places_title: "Where to find the VIN",
     vin_places_sub: "Most vehicles have the VIN in at least two places.",
     vin_place_1_title: "Windshield (driver side)",
-    vin_place_1_body: "Look through the windshield at the dashboard corner on the driver side.",
+    vin_place_1_body:
+      "Look through the windshield at the dashboard corner on the driver side.",
     vin_place_2_title: "Driver door jamb sticker",
-    vin_place_2_body: "Open the driver door and check the sticker on the pillar or door edge.",
+    vin_place_2_body:
+      "Open the driver door and check the sticker on the pillar or door edge.",
     vin_place_3_title: "Documents",
-    vin_place_3_body: "Registration, insurance card, or title often lists the VIN.",
+    vin_place_3_body:
+      "Registration, insurance card, or title often lists the VIN.",
     vin_place_4_title: "Engine bay / frame",
-    vin_place_4_body: "Some vehicles have VIN stamps under the hood or near strut towers.",
+    vin_place_4_body:
+      "Some vehicles have VIN stamps under the hood or near strut towers.",
     vin_scanner_title: "VIN Scanner",
     vin_scanner_sub: "Take a clear photo of the VIN.",
     take_vin_photo: "Take VIN Photo",
     reading: "Reading...",
     err_complete_vin_step: "Complete the VIN step first.",
     err_add_one_damage_photo: "Please add at least one damage photo first.",
-    err_verify_vin_first: "Please verify the VIN first (scan/album/manual lookup).",
+    err_verify_vin_first:
+      "Please verify the VIN first (scan/album/manual lookup).",
     err_select_ym_model: "Please select Year, Make, and Model.",
     err_estimate_failed: "Estimate failed.",
     err_vin_decode_failed: "VIN decode failed.",
@@ -146,7 +231,8 @@ const I18N: Record<Lang, Record<string, string>> = {
     err_something_wrong: "Something went wrong.",
   },
   es: {
-    tagline: "Paso a paso: VIN → fotos → detalles opcionales → estimado rápido.",
+    tagline:
+      "Paso a paso: VIN → fotos → detalles opcionales → estimado rápido.",
     name_optional: "Nombre (opcional)",
     phone_optional: "Teléfono (opcional)",
     city_optional: "Ciudad/ZIP (opcional)",
@@ -188,14 +274,16 @@ const I18N: Record<Lang, Record<string, string>> = {
     damage_details: "Detalles del daño",
     optional: "(opcional)",
     add_notes_help: "Si quieres, agrega notas para estimar más rápido.",
-    damage_placeholder: "Ej.: Parachoques delantero roto, capó doblado, faro del pasajero dañado...",
+    damage_placeholder:
+      "Ej.: Parachoques delantero roto, capó doblado, faro del pasajero dañado...",
     complete_vin_step: "Completar paso de VIN",
     proceed_to_photos: "Ir a Fotos",
     python_fast_estimates: "Estimados Rápidos Python",
     sending: "Enviando...",
     complete_vin_first: "Completa el paso de VIN primero",
     add_damage_photos: "Agrega fotos del daño para continuar",
-    estimate_preliminary: "Los estimados son preliminares y pueden cambiar tras la inspección.",
+    estimate_preliminary:
+      "Los estimados son preliminares y pueden cambiar tras la inspección.",
     call: "Llamar",
     email: "Correo",
     get_directions: "Cómo llegar",
@@ -210,15 +298,19 @@ const I18N: Record<Lang, Record<string, string>> = {
     toast_copied: "copiado",
     toast_copy_failed: "Error al copiar",
     vin_places_title: "Dónde encontrar el VIN",
-    vin_places_sub: "La mayoría de los vehículos tienen el VIN en al menos dos lugares.",
+    vin_places_sub:
+      "La mayoría de los vehículos tienen el VIN en al menos dos lugares.",
     vin_place_1_title: "Parabrisas (lado conductor)",
-    vin_place_1_body: "Mira por el parabrisas en la esquina del tablero del lado del conductor.",
+    vin_place_1_body:
+      "Mira por el parabrisas en la esquina del tablero del lado del conductor.",
     vin_place_2_title: "Etiqueta en el marco de la puerta",
-    vin_place_2_body: "Abre la puerta del conductor y revisa la etiqueta en el pilar o borde.",
+    vin_place_2_body:
+      "Abre la puerta del conductor y revisa la etiqueta en el pilar o borde.",
     vin_place_3_title: "Documentos",
     vin_place_3_body: "Registro, seguro o título suelen mostrar el VIN.",
     vin_place_4_title: "Bahía del motor / chasis",
-    vin_place_4_body: "Algunos vehículos tienen el VIN estampado bajo el capó o cerca de torres.",
+    vin_place_4_body:
+      "Algunos vehículos tienen el VIN estampado bajo el capó o cerca de torres.",
     vin_scanner_title: "Escáner de VIN",
     vin_scanner_sub: "Toma una foto clara del VIN.",
     take_vin_photo: "Tomar foto del VIN",
@@ -277,14 +369,16 @@ const I18N: Record<Lang, Record<string, string>> = {
     damage_details: "Detay domaj",
     optional: "(opsyonèl)",
     add_notes_help: "Si ou vle, ajoute nòt pou ede nou estime pi vit.",
-    damage_placeholder: "Egzanp: Bòmpè devan fann, kapo pliye, limyè devan pasaje kase...",
+    damage_placeholder:
+      "Egzanp: Bòmpè devan fann, kapo pliye, limyè devan pasaje kase...",
     complete_vin_step: "Fini etap VIN",
     proceed_to_photos: "Ale nan Foto",
     python_fast_estimates: "Estimasyon Rapid Python",
     sending: "Ap voye...",
     complete_vin_first: "Fini etap VIN an anvan",
     add_damage_photos: "Ajoute foto domaj pou kontinye",
-    estimate_preliminary: "Estimasyon yo preliminè epi yo ka chanje apre enspeksyon.",
+    estimate_preliminary:
+      "Estimasyon yo preliminè epi yo ka chanje apre enspeksyon.",
     call: "Rele",
     email: "Imèl",
     get_directions: "Jwenn direksyon",
@@ -303,11 +397,13 @@ const I18N: Record<Lang, Record<string, string>> = {
     vin_place_1_title: "Vè devan (bò chofè)",
     vin_place_1_body: "Gade atravè vè devan an sou kwen tablodbò bò chofè a.",
     vin_place_2_title: "Etikèt sou pòt chofè",
-    vin_place_2_body: "Louvri pòt chofè a epi gade etikèt sou poto a oswa bò pòt la.",
+    vin_place_2_body:
+      "Louvri pòt chofè a epi gade etikèt sou poto a oswa bò pòt la.",
     vin_place_3_title: "Dokiman",
     vin_place_3_body: "Kat enskripsyon, asirans, oswa tit souvan gen VIN lan.",
     vin_place_4_title: "Anba kapo / chasi",
-    vin_place_4_body: "Kèk machin gen VIN an anba kapo a oswa toupre pati ankadreman an.",
+    vin_place_4_body:
+      "Kèk machin gen VIN an anba kapo a oswa toupre pati ankadreman an.",
     vin_scanner_title: "Eskanè VIN",
     vin_scanner_sub: "Pran yon foto ki klè sou VIN lan.",
     take_vin_photo: "Pran foto VIN",
@@ -324,7 +420,8 @@ const I18N: Record<Lang, Record<string, string>> = {
     err_something_wrong: "Gen yon pwoblèm.",
   },
   ru: {
-    tagline: "Шаги: VIN → фото → (опционально) детали → быстрый диапазон оценки.",
+    tagline:
+      "Шаги: VIN → фото → (опционально) детали → быстрый диапазон оценки.",
     name_optional: "Имя (необязательно)",
     phone_optional: "Телефон (необязательно)",
     city_optional: "Город/ZIP (необязательно)",
@@ -366,14 +463,16 @@ const I18N: Record<Lang, Record<string, string>> = {
     damage_details: "Детали повреждений",
     optional: "(необязательно)",
     add_notes_help: "Если хотите — добавьте заметки, чтобы мы оценили быстрее.",
-    damage_placeholder: "Пример: треснул передний бампер, капот согнут, фара пассажира разбита...",
+    damage_placeholder:
+      "Пример: треснул передний бампер, капот согнут, фара пассажира разбита...",
     complete_vin_step: "Завершить шаг VIN",
     proceed_to_photos: "Перейти к фото",
     python_fast_estimates: "Python Быстрая Оценка",
     sending: "Отправка...",
     complete_vin_first: "Сначала завершите шаг VIN",
     add_damage_photos: "Добавьте фото повреждений, чтобы продолжить",
-    estimate_preliminary: "Оценка предварительная и может измениться после осмотра.",
+    estimate_preliminary:
+      "Оценка предварительная и может измениться после осмотра.",
     call: "Позвонить",
     email: "Email",
     get_directions: "Маршрут",
@@ -390,9 +489,11 @@ const I18N: Record<Lang, Record<string, string>> = {
     vin_places_title: "Где найти VIN",
     vin_places_sub: "Обычно VIN указан как минимум в двух местах.",
     vin_place_1_title: "Лобовое стекло (сторона водителя)",
-    vin_place_1_body: "Посмотрите через лобовое на угол торпедо со стороны водителя.",
+    vin_place_1_body:
+      "Посмотрите через лобовое на угол торпедо со стороны водителя.",
     vin_place_2_title: "Наклейка на стойке двери водителя",
-    vin_place_2_body: "Откройте дверь водителя и найдите наклейку на стойке или кромке.",
+    vin_place_2_body:
+      "Откройте дверь водителя и найдите наклейку на стойке или кромке.",
     vin_place_3_title: "Документы",
     vin_place_3_body: "Регистрация, страховка или title часто содержат VIN.",
     vin_place_4_title: "Под капотом / на раме",
@@ -415,7 +516,10 @@ const I18N: Record<Lang, Record<string, string>> = {
 };
 
 function normalizeVin(raw: string) {
-  return (raw || "").toUpperCase().replace(/[^A-Z0-9]/g, "").replace(/[IOQ]/g, "");
+  return (raw || "")
+    .toUpperCase()
+    .replace(/[^A-Z0-9]/g, "")
+    .replace(/[IOQ]/g, "");
 }
 
 function clampText(s: string, max = 2000) {
@@ -438,7 +542,9 @@ function caseInsensitiveFind(options: string[], target: string) {
   return options.find((o) => o.toLowerCase() === t) ?? null;
 }
 
-async function safeJson<T>(res: Response): Promise<{ ok: boolean; status: number; data?: T; raw: string }> {
+async function safeJson<T>(
+  res: Response
+): Promise<{ ok: boolean; status: number; data?: T; raw: string }> {
   const status = res.status;
   const raw = await res.text();
   if (!raw) return { ok: res.ok, status, raw: "" };
@@ -469,11 +575,16 @@ function RoundAction({
     tone === "good"
       ? "border-emerald-300/25 bg-emerald-500/10 hover:bg-emerald-500/15"
       : tone === "warn"
-        ? "border-red-400/25 bg-red-500/10 hover:bg-red-500/15"
-        : "border-emerald-200/15 bg-emerald-900/15 hover:bg-emerald-900/20";
+      ? "border-red-400/25 bg-red-500/10 hover:bg-red-500/15"
+      : "border-emerald-200/15 bg-emerald-900/15 hover:bg-emerald-900/20";
 
   return (
-    <button type="button" onClick={onClick} disabled={disabled} className="group flex flex-col items-center gap-2 disabled:opacity-60">
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      className="group flex flex-col items-center gap-2 disabled:opacity-60"
+    >
       <div
         className={[
           "relative grid h-16 w-16 place-items-center rounded-full border",
@@ -493,8 +604,14 @@ function RoundAction({
       </div>
 
       <div className="text-center">
-        <div className="text-sm font-extrabold text-white/95 leading-tight">{title}</div>
-        {subtitle ? <div className="mt-0.5 text-xs text-white/70 leading-tight">{subtitle}</div> : null}
+        <div className="text-sm font-extrabold text-white/95 leading-tight">
+          {title}
+        </div>
+        {subtitle ? (
+          <div className="mt-0.5 text-xs text-white/70 leading-tight">
+            {subtitle}
+          </div>
+        ) : null}
       </div>
     </button>
   );
@@ -551,13 +668,17 @@ export default function Page() {
   const BUSINESS_ADDRESS = "1114 NE 4th Ave, Fort Lauderdale, FL 33304";
 
   const [lang, setLang] = useState<Lang>("en");
+  
   const t = (key: string) => I18N[lang]?.[key] ?? I18N.en[key] ?? key;
 
   const googleMapsLink = useMemo(
-    () => `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(BUSINESS_ADDRESS)}`,
+    () =>
+      `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+        BUSINESS_ADDRESS
+      )}`,
     [BUSINESS_ADDRESS]
   );
-
+  const [langOpen, setLangOpen] = useState(false);
   const [name, setName] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
   const [location, setLocation] = useState("");
@@ -575,7 +696,9 @@ export default function Page() {
   const [vinBusy, setVinBusy] = useState(false);
   const [vinError, setVinError] = useState<string | null>(null);
 
-  const [contactModal, setContactModal] = useState<null | "phone" | "email" | "address">(null);
+  const [contactModal, setContactModal] = useState<
+    null | "phone" | "email" | "address"
+  >(null);
 
   const [photos, setPhotos] = useState<File[]>([]);
   const [damageDescription, setDamageDescription] = useState("");
@@ -596,7 +719,8 @@ export default function Page() {
 
   const modelOptions = useMemo(() => {
     if (!make || make === "Other") return ["Other"];
-    const list = POPULAR_MODELS_BY_MAKE[make as Exclude<PopularMake, "Other">] || [];
+    const list =
+      POPULAR_MODELS_BY_MAKE[make as Exclude<PopularMake, "Other">] || [];
     return [...list, "Other"];
   }, [make]);
 
@@ -606,7 +730,10 @@ export default function Page() {
     return modelChoice;
   }, [modelChoice, modelOther]);
 
-  const hasManualVehicle = useMemo(() => Boolean(year && make && selectedModel), [year, make, selectedModel]);
+  const hasManualVehicle = useMemo(
+    () => Boolean(year && make && selectedModel),
+    [year, make, selectedModel]
+  );
   const canUploadPhotos = useMemo(
     () => (!noVinAccess && vinVerified) || (noVinAccess && hasManualVehicle),
     [noVinAccess, vinVerified, hasManualVehicle]
@@ -632,11 +759,19 @@ export default function Page() {
   }
 
   function setMakeAndPopularModel(decodedMake: string, decodedModel: string) {
-    const matchedMake = POPULAR_MAKES.find((m) => m.toLowerCase() === decodedMake.toLowerCase()) || "Other";
+    const matchedMake =
+      POPULAR_MAKES.find(
+        (m) => m.toLowerCase() === decodedMake.toLowerCase()
+      ) || "Other";
     setMake(matchedMake as PopularMake);
 
     if (matchedMake && matchedMake !== "Other") {
-      const opts = [...(POPULAR_MODELS_BY_MAKE[matchedMake as Exclude<PopularMake, "Other">] || []), "Other"];
+      const opts = [
+        ...(POPULAR_MODELS_BY_MAKE[
+          matchedMake as Exclude<PopularMake, "Other">
+        ] || []),
+        "Other",
+      ];
       const found = caseInsensitiveFind(opts, decodedModel);
       if (found && found !== "Other") {
         setModelChoice(found);
@@ -665,7 +800,9 @@ export default function Page() {
     if (!parsed.ok || !parsed.data?.ok) {
       const msg =
         parsed.data?.error ||
-        (parsed.raw ? `(${parsed.status}) ${parsed.raw.slice(0, 180)}…` : `(${parsed.status}) ${t("err_vin_decode_failed")}`);
+        (parsed.raw
+          ? `(${parsed.status}) ${parsed.raw.slice(0, 180)}…`
+          : `(${parsed.status}) ${t("err_vin_decode_failed")}`);
       throw new Error(msg);
     }
 
@@ -705,7 +842,9 @@ export default function Page() {
 
     const vin = normalizeVin(String(data.vin || ""));
     if (vin.length !== 17) {
-      throw new Error("No VIN found in that photo. Try a clearer VIN close-up.");
+      throw new Error(
+        "No VIN found in that photo. Try a clearer VIN close-up."
+      );
     }
 
     return vin;
@@ -798,7 +937,9 @@ export default function Page() {
       if (!parsed.ok || !parsed.data?.ok) {
         const msg =
           parsed.data?.error ||
-          (parsed.raw ? `(${parsed.status}) ${parsed.raw.slice(0, 220)}…` : `(${parsed.status}) ${t("err_estimate_failed")}`);
+          (parsed.raw
+            ? `(${parsed.status}) ${parsed.raw.slice(0, 220)}…`
+            : `(${parsed.status}) ${t("err_estimate_failed")}`);
         throw new Error(msg);
       }
 
@@ -830,7 +971,11 @@ export default function Page() {
     <main className="min-h-screen bg-[#040907] text-white">
       <div className="relative pb-28">
         <div className="absolute inset-0">
-          <img src="/images/classic_car_1.jpg" alt="Classic car" className="h-full w-full object-cover object-center" />
+          <img
+            src="/images/classic_car_1.jpg"
+            alt="Classic car"
+            className="h-full w-full object-cover object-center"
+          />
 
           <div className="absolute inset-0 bg-black/18" />
 
@@ -843,39 +988,51 @@ export default function Page() {
           <div className={`${heroMinHeight} flex flex-col justify-center`}>
             <header className="flex flex-col items-center gap-5 text-center">
               <div className="flex items-center gap-3">
-                <h1 className="text-3xl font-extrabold tracking-tight sm:text-5xl">{BUSINESS_NAME}</h1>
+                <h1 className="text-3xl font-extrabold tracking-tight sm:text-5xl">
+                  {BUSINESS_NAME}
+                </h1>
 
-                <div className="ml-2 rounded-2xl border border-yellow-300/25 bg-black/55 px-3 py-2 text-xs text-white/85 backdrop-blur">
-                  <select
-                    value={lang}
-                    onChange={(e) => setLang(e.target.value as Lang)}
+                <div className="relative ml-2">
+                  <button
+                    type="button"
+                    onClick={() => setLangOpen((v) => !v)}
+                    className="flex items-center gap-2 rounded-2xl border border-yellow-300/25 bg-black/70 px-3 py-2 text-xs font-extrabold text-white/90 backdrop-blur"
                     aria-label="Language"
-                    className="
-      cursor-pointer
-      bg-transparent
-      text-white
-      outline-none
-      pr-6
-      appearance-none
-    "
-                    style={{
-                      WebkitAppearance: "none",
-                      MozAppearance: "none",
-                      appearance: "none",
-                    }}
                   >
-                    <option value="en" style={{ backgroundColor: "#000", color: "#fff" }}>EN</option>
-                    <option value="es" style={{ backgroundColor: "#000", color: "#fff" }}>ES</option>
-                    <option value="ht" style={{ backgroundColor: "#000", color: "#fff" }}>HT</option>
-                    <option value="ru" style={{ backgroundColor: "#000", color: "#fff" }}>RU</option>
-                  </select>
+                    {lang.toUpperCase()}
+                    <span className="text-white/70">▾</span>
+                  </button>
 
-                  {/* tiny dropdown chevron so it *looks* like a dropdown */}
-                  <span className="pointer-events-none absolute ml-[-18px] mt-[2px] text-white/75">▾</span>
+                  {langOpen ? (
+                    <div className="absolute right-0 z-[80] mt-2 w-16 overflow-hidden rounded-2xl border border-yellow-300/25 bg-black shadow-[0_18px_40px_rgba(0,0,0,0.65)]">
+                      {(["en", "es", "ht", "ru"] as Lang[]).map((l) => (
+                        <button
+                          key={l}
+                          type="button"
+                          onClick={() => {
+                            setLang(l);
+                            setLangOpen(false);
+                          }}
+                          className={[
+                            "w-full px-3 py-2 text-left text-xs font-extrabold text-white/90",
+                            "hover:bg-emerald-900/60",
+                            lang === l ? "bg-emerald-950/60" : "bg-black",
+                          ].join(" ")}
+                        >
+                          {l.toUpperCase()}
+                        </button>
+                      ))}
+                    </div>
+                  ) : null}
                 </div>
 
+                {/* tiny dropdown chevron so it *looks* like a dropdown */}
+                <span className="pointer-events-none absolute ml-[-18px] mt-[2px] text-white/75">
+                  ▾
+                </span>
+              </div>
 
-                <p className="max-w-2xl text-white/90">{t("tagline")}</p>
+              <p className="max-w-2xl text-white/90">{t("tagline")}</p>
             </header>
           </div>
 
@@ -883,7 +1040,9 @@ export default function Page() {
           <div className="mt-6 rounded-3xl border border-yellow-300/20 bg-black/80 p-5 backdrop-blur-md shadow-[0_18px_40px_rgba(0,0,0,0.65)] sm:p-7">
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
               <div>
-                <label className="text-sm text-white/75">{t("name_optional")}</label>
+                <label className="text-sm text-white/75">
+                  {t("name_optional")}
+                </label>
                 <input
                   value={name}
                   onChange={(e) => setName(e.target.value)}
@@ -893,7 +1052,9 @@ export default function Page() {
                 />
               </div>
               <div>
-                <label className="text-sm text-white/75">{t("phone_optional")}</label>
+                <label className="text-sm text-white/75">
+                  {t("phone_optional")}
+                </label>
                 <input
                   value={customerPhone}
                   onChange={(e) => setCustomerPhone(e.target.value)}
@@ -903,7 +1064,9 @@ export default function Page() {
                 />
               </div>
               <div>
-                <label className="text-sm text-white/75">{t("city_optional")}</label>
+                <label className="text-sm text-white/75">
+                  {t("city_optional")}
+                </label>
                 <input
                   value={location}
                   onChange={(e) => setLocation(e.target.value)}
@@ -981,13 +1144,19 @@ export default function Page() {
                       />
                     </div>
 
-                    {vinBusy ? <div className="mt-4 text-center text-sm text-white/75">{t("working_reading")}</div> : null}
+                    {vinBusy ? (
+                      <div className="mt-4 text-center text-sm text-white/75">
+                        {t("working_reading")}
+                      </div>
+                    ) : null}
                   </div>
 
                   {showManualVinInput ? (
                     <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-3">
                       <div className="sm:col-span-2">
-                        <label className="text-sm text-white/75">{t("enter_vin_manually")}</label>
+                        <label className="text-sm text-white/75">
+                          {t("enter_vin_manually")}
+                        </label>
                         <input
                           id="vin-input"
                           value={vin}
@@ -1008,9 +1177,14 @@ export default function Page() {
                               await decodeVinAndPopulate(vin);
                               setNoVinAccess(false);
                               showToast(t("vin_verified"));
-                              window.setTimeout(() => scrollTo("photos-section"), 250);
+                              window.setTimeout(
+                                () => scrollTo("photos-section"),
+                                250
+                              );
                             } catch (e: any) {
-                              setVinError(e?.message || t("err_vin_decode_failed"));
+                              setVinError(
+                                e?.message || t("err_vin_decode_failed")
+                              );
                             } finally {
                               setVinBusy(false);
                             }
@@ -1032,10 +1206,16 @@ export default function Page() {
 
                   {vinVerified ? (
                     <div className="mt-3 rounded-xl border border-yellow-300/30 bg-yellow-500/10 p-3 text-sm text-yellow-100">
-                      VIN: <span className="font-mono font-semibold">{normalizeVin(vin)}</span>
+                      VIN:{" "}
+                      <span className="font-mono font-semibold">
+                        {normalizeVin(vin)}
+                      </span>
                       {year && make && selectedModel ? (
                         <div className="mt-1 text-white/85">
-                          Vehicle: <b>{year} {make} {selectedModel}</b>
+                          Vehicle:{" "}
+                          <b>
+                            {year} {make} {selectedModel}
+                          </b>
                         </div>
                       ) : null}
                       <button
@@ -1053,8 +1233,12 @@ export default function Page() {
                 <div className="mt-4">
                   <div className="flex items-start justify-between gap-4">
                     <div>
-                      <h3 className="text-base font-bold">{t("vehicle_details")}</h3>
-                      <p className="text-sm text-white/70">{t("select_year_make_model")}</p>
+                      <h3 className="text-base font-bold">
+                        {t("vehicle_details")}
+                      </h3>
+                      <p className="text-sm text-white/70">
+                        {t("select_year_make_model")}
+                      </p>
                     </div>
 
                     <button
@@ -1072,7 +1256,9 @@ export default function Page() {
 
                   <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
                     <div>
-                      <label className="text-sm text-white/75">{t("year")}</label>
+                      <label className="text-sm text-white/75">
+                        {t("year")}
+                      </label>
                       <select
                         value={year}
                         onChange={(e) => setYear(e.target.value)}
@@ -1081,13 +1267,17 @@ export default function Page() {
                       >
                         <option value="">{t("select")}</option>
                         {YEARS.map((y) => (
-                          <option key={y} value={y}>{y}</option>
+                          <option key={y} value={y}>
+                            {y}
+                          </option>
                         ))}
                       </select>
                     </div>
 
                     <div>
-                      <label className="text-sm text-white/75">{t("make")}</label>
+                      <label className="text-sm text-white/75">
+                        {t("make")}
+                      </label>
                       <select
                         value={make}
                         onChange={(e) => {
@@ -1101,13 +1291,17 @@ export default function Page() {
                       >
                         <option value="">{t("select")}</option>
                         {POPULAR_MAKES.map((m) => (
-                          <option key={m} value={m}>{m}</option>
+                          <option key={m} value={m}>
+                            {m}
+                          </option>
                         ))}
                       </select>
                     </div>
 
                     <div>
-                      <label className="text-sm text-white/75">{t("model")}</label>
+                      <label className="text-sm text-white/75">
+                        {t("model")}
+                      </label>
                       <select
                         value={modelChoice}
                         onChange={(e) => {
@@ -1120,7 +1314,9 @@ export default function Page() {
                       >
                         <option value="">{t("select")}</option>
                         {modelOptions.map((m) => (
-                          <option key={m} value={m}>{m}</option>
+                          <option key={m} value={m}>
+                            {m}
+                          </option>
                         ))}
                       </select>
 
@@ -1148,7 +1344,9 @@ export default function Page() {
             {canUploadPhotos ? (
               <div id="photos-section" className="mt-7">
                 <h2 className="text-lg font-bold">{t("photos")}</h2>
-                <p className="text-sm text-white/70">{t("add_photos_damage")}</p>
+                <p className="text-sm text-white/70">
+                  {t("add_photos_damage")}
+                </p>
 
                 <div className="mt-4 rounded-3xl border border-emerald-200/15 bg-emerald-950/35 p-5">
                   <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
@@ -1182,7 +1380,8 @@ export default function Page() {
                       className="hidden"
                       onChange={(e) => {
                         const files = Array.from(e.target.files || []);
-                        if (files.length) setPhotos((prev) => [...prev, ...files]);
+                        if (files.length)
+                          setPhotos((prev) => [...prev, ...files]);
                         e.currentTarget.value = "";
                       }}
                       disabled={submitting}
@@ -1205,9 +1404,15 @@ export default function Page() {
                     />
 
                     <div className="flex flex-col items-center justify-center text-center">
-                      <div className="text-sm font-extrabold text-white/95">{photos.length}</div>
+                      <div className="text-sm font-extrabold text-white/95">
+                        {photos.length}
+                      </div>
                       <div className="text-xs text-white/70 leading-tight">
-                        {photos.length} {photos.length === 1 ? t("photo_label") : t("photos_label")} {t("selected")}
+                        {photos.length}{" "}
+                        {photos.length === 1
+                          ? t("photo_label")
+                          : t("photos_label")}{" "}
+                        {t("selected")}
                       </div>
                     </div>
                   </div>
@@ -1259,7 +1464,11 @@ export default function Page() {
                   {t("proceed_to_photos")}
                 </GoldShineButton>
               ) : (
-                <GoldShineButton variant="primary" disabled={submitting || vinBusy} onClick={submitEstimate}>
+                <GoldShineButton
+                  variant="primary"
+                  disabled={submitting || vinBusy}
+                  onClick={submitEstimate}
+                >
                   {submitting ? t("sending") : t("python_fast_estimates")}
                 </GoldShineButton>
               )}
@@ -1273,12 +1482,19 @@ export default function Page() {
               {result?.ok ? (
                 <div className="mt-4 rounded-2xl border border-yellow-300/30 bg-yellow-500/10 p-4">
                   <div className="font-bold text-yellow-100">Submitted</div>
-                  {result?.estimate?.price?.totalLow != null && result?.estimate?.price?.totalHigh != null ? (
+                  {result?.estimate?.price?.totalLow != null &&
+                  result?.estimate?.price?.totalHigh != null ? (
                     <div className="mt-2 text-white/85">
                       Estimated total:{" "}
                       <span className="font-extrabold">
-                        ${Number(result.estimate.price.totalLow).toLocaleString()}–$
-                        {Number(result.estimate.price.totalHigh).toLocaleString()}
+                        $
+                        {Number(
+                          result.estimate.price.totalLow
+                        ).toLocaleString()}
+                        –$
+                        {Number(
+                          result.estimate.price.totalHigh
+                        ).toLocaleString()}
                       </span>
                     </div>
                   ) : null}
@@ -1287,7 +1503,9 @@ export default function Page() {
             </div>
           </div>
 
-          <footer className="mt-8 pb-6 text-center text-xs text-white/65">{t("estimate_preliminary")}</footer>
+          <footer className="mt-8 pb-6 text-center text-xs text-white/65">
+            {t("estimate_preliminary")}
+          </footer>
         </div>
 
         <div className="fixed bottom-4 left-1/2 z-[75] w-[min(560px,calc(100vw-2rem))] -translate-x-1/2">
@@ -1320,15 +1538,26 @@ export default function Page() {
 
         {contactModal ? (
           <div className="fixed inset-0 z-[90] flex items-center justify-center p-4">
-            <div className="absolute inset-0 bg-black/70" onClick={() => setContactModal(null)} />
+            <div
+              className="absolute inset-0 bg-black/70"
+              onClick={() => setContactModal(null)}
+            />
             <div className="relative w-full max-w-md rounded-3xl border border-yellow-300/22 bg-[#06110b] p-5 shadow-2xl">
               <div className="flex items-start justify-between gap-4">
                 <div>
                   <h3 className="text-xl font-extrabold">
-                    {contactModal === "phone" ? t("call") : contactModal === "email" ? t("email") : t("get_directions")}
+                    {contactModal === "phone"
+                      ? t("call")
+                      : contactModal === "email"
+                      ? t("email")
+                      : t("get_directions")}
                   </h3>
                   <p className="mt-1 text-sm text-white/70 break-words">
-                    {contactModal === "phone" ? BUSINESS_PHONE_PRETTY : contactModal === "email" ? BUSINESS_EMAIL : BUSINESS_ADDRESS}
+                    {contactModal === "phone"
+                      ? BUSINESS_PHONE_PRETTY
+                      : contactModal === "email"
+                      ? BUSINESS_EMAIL
+                      : BUSINESS_ADDRESS}
                   </p>
                 </div>
 
@@ -1416,12 +1645,19 @@ export default function Page() {
 
         {showVinHelp ? (
           <div className="fixed inset-0 z-[85] flex items-center justify-center p-4">
-            <div className="absolute inset-0 bg-black/70" onClick={() => setShowVinHelp(false)} />
+            <div
+              className="absolute inset-0 bg-black/70"
+              onClick={() => setShowVinHelp(false)}
+            />
             <div className="relative w-full max-w-2xl rounded-3xl border border-yellow-300/22 bg-[#06110b] p-6 shadow-2xl">
               <div className="flex items-start justify-between gap-4">
                 <div>
-                  <h3 className="text-xl font-extrabold">{t("vin_places_title")}</h3>
-                  <p className="mt-1 text-sm text-white/70">{t("vin_places_sub")}</p>
+                  <h3 className="text-xl font-extrabold">
+                    {t("vin_places_title")}
+                  </h3>
+                  <p className="mt-1 text-sm text-white/70">
+                    {t("vin_places_sub")}
+                  </p>
                 </div>
                 <button
                   type="button"
@@ -1435,22 +1671,30 @@ export default function Page() {
               <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div className="rounded-2xl border border-emerald-200/12 bg-emerald-950/35 p-4">
                   <div className="font-semibold">{t("vin_place_1_title")}</div>
-                  <div className="mt-2 text-sm text-white/75">{t("vin_place_1_body")}</div>
+                  <div className="mt-2 text-sm text-white/75">
+                    {t("vin_place_1_body")}
+                  </div>
                 </div>
 
                 <div className="rounded-2xl border border-emerald-200/12 bg-emerald-950/35 p-4">
                   <div className="font-semibold">{t("vin_place_2_title")}</div>
-                  <div className="mt-2 text-sm text-white/75">{t("vin_place_2_body")}</div>
+                  <div className="mt-2 text-sm text-white/75">
+                    {t("vin_place_2_body")}
+                  </div>
                 </div>
 
                 <div className="rounded-2xl border border-emerald-200/12 bg-emerald-950/35 p-4">
                   <div className="font-semibold">{t("vin_place_3_title")}</div>
-                  <div className="mt-2 text-sm text-white/75">{t("vin_place_3_body")}</div>
+                  <div className="mt-2 text-sm text-white/75">
+                    {t("vin_place_3_body")}
+                  </div>
                 </div>
 
                 <div className="rounded-2xl border border-emerald-200/12 bg-emerald-950/35 p-4">
                   <div className="font-semibold">{t("vin_place_4_title")}</div>
-                  <div className="mt-2 text-sm text-white/75">{t("vin_place_4_body")}</div>
+                  <div className="mt-2 text-sm text-white/75">
+                    {t("vin_place_4_body")}
+                  </div>
                 </div>
               </div>
             </div>
@@ -1459,12 +1703,19 @@ export default function Page() {
 
         {showVinScanner ? (
           <div className="fixed inset-0 z-[85] flex items-center justify-center p-4">
-            <div className="absolute inset-0 bg-black/70" onClick={() => (vinBusy ? null : setShowVinScanner(false))} />
+            <div
+              className="absolute inset-0 bg-black/70"
+              onClick={() => (vinBusy ? null : setShowVinScanner(false))}
+            />
             <div className="relative w-full max-w-lg rounded-3xl border border-yellow-300/22 bg-[#06110b] p-5 shadow-2xl">
               <div className="flex items-start justify-between gap-4">
                 <div>
-                  <h3 className="text-xl font-extrabold">{t("vin_scanner_title")}</h3>
-                  <p className="mt-1 text-sm text-white/70">{t("vin_scanner_sub")}</p>
+                  <h3 className="text-xl font-extrabold">
+                    {t("vin_scanner_title")}
+                  </h3>
+                  <p className="mt-1 text-sm text-white/70">
+                    {t("vin_scanner_sub")}
+                  </p>
                 </div>
                 <button
                   type="button"
@@ -1494,8 +1745,11 @@ export default function Page() {
                 <button
                   type="button"
                   onClick={() => cameraVinRef.current?.click()}
-                  className={`inline-flex w-full items-center justify-center rounded-2xl px-4 py-4 font-extrabold border border-yellow-300/30 shadow-[0_14px_28px_rgba(0,0,0,0.55)] ${vinBusy ? "bg-white/5 text-white/45 cursor-not-allowed" : "bg-emerald-950/40 hover:bg-emerald-950/50"
-                    }`}
+                  className={`inline-flex w-full items-center justify-center rounded-2xl px-4 py-4 font-extrabold border border-yellow-300/30 shadow-[0_14px_28px_rgba(0,0,0,0.55)] ${
+                    vinBusy
+                      ? "bg-white/5 text-white/45 cursor-not-allowed"
+                      : "bg-emerald-950/40 hover:bg-emerald-950/50"
+                  }`}
                   disabled={vinBusy}
                 >
                   {vinBusy ? t("reading") : t("take_vin_photo")}
