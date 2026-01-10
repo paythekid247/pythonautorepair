@@ -16,22 +16,40 @@ function pickValue(results: any[], name: string) {
 
 export async function POST(req: Request) {
   try {
-    const body = await req.json();
-    const vin = normalizeVin(body?.vin || "");
+    const body = await req.json().catch(() => null);
+    const vin = normalizeVin((body as any)?.vin || "");
 
     if (vin.length !== 17) {
       return Response.json({ ok: false, error: "VIN must be 17 characters." }, { status: 400 });
     }
 
-    // NHTSA VPIC decode
     const url = `https://vpic.nhtsa.dot.gov/api/vehicles/DecodeVinValuesExtended/${vin}?format=json`;
     const r = await fetch(url, { cache: "no-store" });
 
     if (!r.ok) {
-      return Response.json({ ok: false, error: "VIN decode service failed." }, { status: 502 });
+      return Response.json(
+        { ok: false, error: "VIN decode service failed.", upstreamStatus: r.status },
+        { status: 502 }
+      );
     }
 
-    const data = await r.json();
+    // ✅ safer than r.json() — captures non-JSON upstream responses
+    const text = await r.text();
+    let data: any = null;
+    try {
+      data = JSON.parse(text);
+    } catch {
+      return Response.json(
+        {
+          ok: false,
+          error: "VIN decode service returned invalid JSON.",
+          upstreamStatus: r.status,
+          upstreamSnippet: text.slice(0, 180),
+        },
+        { status: 502 }
+      );
+    }
+
     const results = data?.Results || [];
 
     const year = pickValue(results, "Model Year");
@@ -55,7 +73,7 @@ export async function POST(req: Request) {
     });
   } catch (err: any) {
     return Response.json(
-      { ok: false, error: err?.message || "Server error decoding VIN." },
+      { ok: false, error: err?.message ? String(err.message) : "Server error decoding VIN." },
       { status: 500 }
     );
   }
